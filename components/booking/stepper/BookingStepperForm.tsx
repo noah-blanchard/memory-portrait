@@ -2,9 +2,18 @@
 
 import dayjs from 'dayjs';
 import { useState } from 'react';
+import {
+  IconCalendar,
+  IconInfoCircle,
+  IconMoodCheck,
+  IconMoodHappy,
+  IconMoodSmile,
+  IconUser,
+} from '@tabler/icons-react';
 import { z } from 'zod';
-import { Alert, Button, Stack, Stepper } from '@mantine/core';
+import { Alert, Stack, Stepper } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import ReceiptCard, { ReceiptData } from '@/components/receipt/ReceiptCard';
 import { mantineZodResolver } from '@/lib/mantineZodResolver';
 import { bookingCreateSchema } from '@/schemas/bookingCreate';
 import { step1Schema, step2Schema, step3Schema } from '@/schemas/bookingSteps';
@@ -35,6 +44,7 @@ export default function BookingStepperForm() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [receipt, setReceipt] = useState<ReceiptData | null>(null);
 
   // valeurs de toutes les étapes dans un seul form (1 colonne)
   const form = useForm({
@@ -97,15 +107,12 @@ export default function BookingStepperForm() {
     const final = bookingCreateSchema.safeParse(candidate);
     if (!final.success) {
       const errs: Record<string, string> = {};
-      for (const i of final.error.issues) {
-        errs[i.path.join('.')] = i.message;
-      }
+      for (const i of final.error.issues) errs[i.path.join('.')] = i.message;
       form.setErrors(errs);
       return;
     }
 
     setServerError(null);
-    setSuccess(false);
     setLoading(true);
     try {
       const res = await fetch('/api/bookings', {
@@ -114,18 +121,42 @@ export default function BookingStepperForm() {
         body: JSON.stringify(final.data),
       });
       const json = await res.json();
+
       if (!res.ok || !json?.ok) {
         setServerError(json?.error?.message ?? 'Unknown error');
         return;
       }
-      setSuccess(true);
+
+      // Construire le reçu
+      const created = json.data as { request_uid?: string; created_at?: string } | undefined;
+      setReceipt({
+        id: created?.request_uid ?? null,
+        createdAt: created?.created_at ?? null,
+        name: final.data.clientName,
+        method: final.data.contactMethod,
+        contact: final.data.contact,
+        kind: final.data.photoshootKind,
+        date: dayjs(start).format('YYYY-MM-DD'),
+        start: dayjs(start).format('HH:mm'),
+        end: dayjs(end).format('HH:mm'),
+        durationHours: form.values.durationHours,
+        location: final.data.location ?? null,
+      });
+
+      // Step "Completed"
+      setActive(3);
       form.reset();
-      setActive(0);
     } catch (e: any) {
       setServerError(e?.message ?? 'Network error');
     } finally {
       setLoading(false);
     }
+  };
+
+  const restart = () => {
+    setReceipt(null);
+    form.reset();
+    setActive(0);
   };
 
   return (
@@ -142,21 +173,23 @@ export default function BookingStepperForm() {
       )}
 
       <Stepper active={active} onStepClick={setActive} allowNextStepsSelect={false}>
-        <Stepper.Step label="First step" description="Contact">
+        <Stepper.Step icon={<IconUser size={18} />} completedIcon={<IconMoodSmile size={18} />}>
           <Step1Contact form={form} onNext={next} />
         </Stepper.Step>
 
-        <Stepper.Step label="Second step" description="Details">
+        <Stepper.Step
+          icon={<IconInfoCircle size={18} />}
+          completedIcon={<IconMoodHappy size={18} />}
+        >
           <Step2Details form={form} onBack={back} onNext={next} />
         </Stepper.Step>
 
-        <Stepper.Step label="Final step" description="Schedule">
+        <Stepper.Step icon={<IconCalendar size={18} />} completedIcon={<IconMoodCheck size={18} />}>
           <Step3Schedule loading={loading} form={form} onBack={back} onSubmit={handleSubmit} />
         </Stepper.Step>
 
         <Stepper.Completed>
-          {/* Optionnel : on ne l'atteint pas car on reset au succès */}
-          <Button onClick={() => setActive(0)}>Start over</Button>
+          <ReceiptCard data={receipt} onNew={restart} />
         </Stepper.Completed>
       </Stepper>
     </Stack>

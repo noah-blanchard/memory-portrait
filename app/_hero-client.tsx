@@ -1,13 +1,13 @@
 'use client';
 
-import { IconCamera } from '@tabler/icons-react';
-import { Card, Container, Group, Stack } from '@mantine/core';
+import { IconBrandInstagram, IconBrandWechat, IconCamera } from '@tabler/icons-react';
+import { ActionIcon, Card, Container, Group, Stack } from '@mantine/core';
 import { Anchor, Badge, Button, Text, Title } from '@/components/I18nUI/I18nUI';
 import LandingIllustration from '@/components/svgs-illustrations/LandingIllustration';
 
 export default function HeroClient() {
   return (
-    <>
+    <Container>
       <Stack gap="sm" align="center">
         <Badge
           size="lg"
@@ -58,7 +58,7 @@ export default function HeroClient() {
             style={{
               display: 'inline-block',
               backgroundColor: 'var(--mantine-color-babyBlue-0)',
-              border: '1px solid var(--mantine-color-babyBlue-3)',
+              border: '1px dashed var(--mantine-color-babyBlue-3)',
               borderRadius: 12,
               textDecoration: 'none',
               textUnderlineOffset: 4,
@@ -83,26 +83,27 @@ export default function HeroClient() {
 
         {/* Flèche animée vers le CTA principal */}
       </Stack>
-      <Group justify="center" mt="xl">
-        <LandingIllustration width={100} />
-      </Group>
+      <Group justify="center" mt="xl" gap="sm">
+        <ActionIcon
+          aria-label="Instagram"
+          size="lg"
+          radius="xl"
+          variant="gradient"
+          gradient={{ from: 'pink.5', to: 'orange.5', deg: 45 }}
+        >
+          <IconBrandInstagram size={18} />
+        </ActionIcon>
 
-      <Group justify="center" mt="md">
-        {/* <Button
-            size="xs"
-            variant={i18n.language === "en" ? "filled" : "light"}
-            onClick={() => i18n.changeLanguage("en")}
-          >
-            EN
-          </Button>
-          <Button
-            size="xs"
-            variant={i18n.language === "zh" ? "filled" : "light"}
-            onClick={() => i18n.changeLanguage("zh")}
-          >
-            中文
-          </Button> */}
+        <ActionIcon
+          aria-label="WeChat"
+          size="lg"
+          radius="xl"
+          variant="filled"
+          bg="wechatGreen.5" // vert WeChat
+        >
+          <IconBrandWechat size={18} />
+        </ActionIcon>
       </Group>
-    </>
+    </Container>
   );
 }

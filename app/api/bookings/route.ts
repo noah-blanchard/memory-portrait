@@ -2,9 +2,10 @@ import { bookingCreateSchema } from "@/schemas/bookingCreate";
 import { json } from "@/utils/api/helpers";
 import { createBookingArgs } from "./helpers";
 import { createServerClient } from "@/utils/supabase/server";
+import { NextResponse } from "next/server";
+import { bookingGroupedSchema } from "@/schemas/bookingGrouped";
 
 export async function POST(req: Request) {
-  // 1) Content-Type
   const ct = req.headers.get("content-type") ?? "";
   if (!ct.includes("application/json")) {
     return json(
@@ -39,7 +40,6 @@ export async function POST(req: Request) {
     );
   }
 
-  // 4) RPC call
   const args = createBookingArgs(parsed.data);
   try {
     const supabase = await createServerClient()
@@ -71,4 +71,46 @@ export async function POST(req: Request) {
   } catch (e: any) {
     return json({ ok: false, error: { code: "server_error", message: e?.message ?? "Unexpected error" } }, 500);
   }
+}
+
+export async function GET() {
+  const supabase = await createServerClient();
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return NextResponse.json(
+      { ok: false, error: { code: 'unauthorized', message: 'Auth required' } },
+      { status: 401 }
+    );
+  }
+
+  const { data, error } = await supabase.rpc('booking_requests_grouped_by_status');
+
+  if (error) {
+    return NextResponse.json(
+      { ok: false, error: { code: 'rpc_error', message: error.message } },
+      { status: 500 }
+    );
+  }
+
+  const parsed = bookingGroupedSchema.safeParse(data);
+  if (!parsed.success) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: {
+          code: 'invalid_payload',
+          message: 'Invalid payload from database',
+          issues: parsed.error.issues,
+        },
+      },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json({ ok: true, data: parsed.data }, { status: 200 });
 }

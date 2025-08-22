@@ -47,6 +47,18 @@ export const theme: MantineThemeOverride = createTheme({
       '#1e293b',
       '#0f172a',
     ],
+    wechatGreen: [
+      '#e6f9f0',
+      '#c3f7e0',
+      '#99f0c1',
+      '#5de8a3',
+      '#2de68f',
+      '#00b76b',
+      '#00a05e',
+      '#008c52',
+      '#007a47',
+      '#006b3c',
+    ],
   },
 
   // ---------- Réglages globaux ----------

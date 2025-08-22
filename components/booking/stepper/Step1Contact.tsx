@@ -1,12 +1,49 @@
 'use client';
 
-import { Button, Group, Select, Stack, TextInput } from '@mantine/core';
+import {
+  IconAt,
+  IconBrandInstagram,
+  IconBrandWechat,
+  IconMail,
+  IconPhone,
+} from '@tabler/icons-react';
+import {
+  Button,
+  Flex,
+  Group,
+  rem,
+  SegmentedControl,
+  Stack,
+  Text,
+  TextInput,
+  Tooltip,
+} from '@mantine/core';
 import type { UseFormReturnType } from '@mantine/form';
 
 export type Step1Values = {
   clientName: string;
   contactMethod: string;
   contact: string;
+};
+
+const methodIcon = (m: Step1Values['contactMethod'], size = 16) => {
+  switch (m) {
+    case 'email':
+      return <IconMail size={size} />;
+    case 'wechat':
+      return <IconBrandWechat size={size} />;
+    case 'instagram':
+      return <IconBrandInstagram size={size} />;
+    case 'phone':
+      return <IconPhone size={size} />;
+  }
+};
+
+const placeholderByMethod: Record<Step1Values['contactMethod'], string> = {
+  email: 'jane@example.com',
+  wechat: 'wechat_id',
+  instagram: '@yourhandle',
+  phone: '+15551234567',
 };
 
 export default function Step1Contact({
@@ -25,20 +62,77 @@ export default function Step1Contact({
         {...form.getInputProps('clientName')}
       />
 
-      <Select
-        label="Contact method"
-        data={form.values.__contactMethodOptions ?? []}
-        withAsterisk
-        allowDeselect={false}
-        {...form.getInputProps('contactMethod')}
-      />
+      {/* <Group>
+        <Group gap={6} mb={8}>
+          <Text size="sm" fw={600}>
+            Contact method
+            <Text span c="red">
+              *
+            </Text>
+          </Text>
+        </Group>
 
-      <TextInput
-        label="Contact"
-        placeholder="jane@example.com / wechat id / @insta / +1…"
-        withAsterisk
-        {...form.getInputProps('contact')}
-      />
+        
+      </Group> */}
+      <Stack gap="md" w="100%">
+        {/* Champ contact assorti (icône à gauche, placeholder dynamique) */}
+        <TextInput
+          style={{ flex: 1 }} // pour prendre le reste de l'espace
+          mt="xs"
+          label="Contact"
+          leftSection={methodIcon(form.values.contactMethod, 18)}
+          placeholder={placeholderByMethod[form.values.contactMethod]}
+          withAsterisk
+          {...form.getInputProps('contact')}
+        />
+        <SegmentedControl
+          fullWidth
+          size="lg"
+          radius="xl"
+          color="babyBlue"
+          bg="babyBlue.2"
+          value={form.values.contactMethod}
+          onChange={(v) => form.setFieldValue('contactMethod', v as Step1Values['contactMethod'])}
+          data={[
+            {
+              value: 'email',
+              label: <Tooltip label="Email">{methodIcon('email', 18)}</Tooltip>,
+            },
+            {
+              value: 'wechat',
+              label: <Tooltip label="WeChat">{methodIcon('wechat', 18)}</Tooltip>,
+            },
+            {
+              value: 'instagram',
+              label: <Tooltip label="Instagram">{methodIcon('instagram', 18)}</Tooltip>,
+            },
+            {
+              value: 'phone',
+              label: <Tooltip label="Phone">{methodIcon('phone', 18)}</Tooltip>,
+            },
+          ]}
+          // 🎨 style doux + items égaux
+          styles={{
+            root: {
+              background: 'var(--mantine-color-babyBlue-0)',
+              padding: rem(4),
+            },
+            control: {
+              flex: 1, // chaque item prend la même largeur
+            },
+            label: {
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: rem(38),
+              gap: rem(6),
+            },
+            indicator: {
+              boxShadow: `inset 0 0 0 2px var(--mantine-color-babyBlue-4)`,
+            },
+          }}
+        />
+      </Stack>
 
       <Group justify="space-between" mt="md">
         <Button variant="default" disabled>

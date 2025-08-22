@@ -127,9 +127,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      booking_requests_grouped_by_status: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       create_booking_request: {
         Args: {
-          p_budget_cents?: number
           p_client_name: string
           p_contact: string
           p_contact_method: Database["public"]["Enums"]["contact_method"]
