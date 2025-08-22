@@ -414,6 +414,31 @@ export type Database = {
           updated_at: string
         }[]
       }
+      set_booking_status: {
+        Args: {
+          p_request_uid: string
+          p_status: Database["public"]["Enums"]["booking_status"]
+        }
+        Returns: {
+          budget_cents: number | null
+          client_name: string
+          contact: string
+          contact_method: Database["public"]["Enums"]["contact_method"]
+          created_at: string
+          ends_at: string | null
+          id: number
+          language: string | null
+          location: string | null
+          notes: string | null
+          people_count: number
+          photoshoot_kind: Database["public"]["Enums"]["photoshoot_type"]
+          request_uid: string
+          requested_period: unknown
+          starts_at: string | null
+          status: Database["public"]["Enums"]["booking_status"]
+          updated_at: string
+        }
+      }
     }
     Enums: {
       booking_status:

@@ -1,35 +1,88 @@
 'use client';
 
+import { useState } from 'react';
 import dayjs from 'dayjs';
 import {
-  IconCalendar,
-  IconCamera,
-  IconCheck,
-  IconClock,
-  IconCopy,
-  IconHash,
-  IconMapPin,
-  IconNote,
-  IconUsers,
+  IconCalendar, IconCamera, IconCheck, IconClock, IconCopy, IconHash,
+  IconMapPin, IconNote, IconUsers, IconDots, IconCircleCheck, IconCircleX,
+  IconBan, IconSearch, IconHourglassHigh,
 } from '@tabler/icons-react';
-import { ActionIcon, Card, CopyButton, Divider, Group, Stack, Text, Tooltip } from '@mantine/core';
+import {
+  ActionIcon, Card, CopyButton, Divider, Group, Menu, rem,
+  Stack, Text, Tooltip, Button,
+} from '@mantine/core';
 import type { BookingRequestsRow } from '@/types/db-rows';
 import ContactPill from './ContactPill';
 import StatusBadge from './StatusBadge';
+import { STATUS_META, STATUS_ORDER, type BookingStatus } from '../statusTheme';
 
-export default function BookingCard({ row }: { row: Omit<BookingRequestsRow, 'id'> }) {
+export default function BookingCard({
+  row,
+  onChangeStatus,
+}: {
+  row: Omit<BookingRequestsRow, 'id'>;
+  onChangeStatus: (uid: string, from: BookingStatus, to: BookingStatus) => Promise<void>;
+}) {
   const start = dayjs(row.starts_at);
   const end = dayjs(row.ends_at);
+  const [changing, setChanging] = useState(false);
+
+  const handleSelect = async (to: BookingStatus) => {
+    if (to === row.status) return;
+    setChanging(true);
+    try {
+      await onChangeStatus(row.request_uid, row.status as BookingStatus, to);
+    } finally {
+      setChanging(false);
+    }
+  };
 
   return (
     <Card withBorder radius="md" shadow="xs" p="md">
       <Stack gap="xs">
         {/* header */}
-        <Group justify="space-between" wrap="nowrap">
-          <Text fw={700} truncate>
-            {row.client_name}
-          </Text>
-          <StatusBadge status={row.status} />
+        <Group justify="space-between" wrap="nowrap" align="center">
+          <Text fw={700} truncate>{row.client_name}</Text>
+          <Group gap="xs">
+            <StatusBadge status={row.status as BookingStatus} />
+            <Menu withinPortal position="bottom-end" shadow="md">
+              <Menu.Target>
+                <Button
+                  variant="subtle"
+                  size="compact-sm"
+                  radius="md"
+                  leftSection={<IconDots size={16} />}
+                  loading={changing}
+                >
+                  Change
+                </Button>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Label>Set status</Menu.Label>
+                {STATUS_ORDER.map((s) => {
+                  const meta = STATUS_META[s];
+                  const left =
+                    s === 'approved'  ? <IconCircleCheck size={16} /> :
+                    s === 'rejected'  ? <IconCircleX size={16} /> :
+                    s === 'cancelled' ? <IconBan size={16} /> :
+                    s === 'reviewed'  ? <IconSearch size={16} /> :
+                    <IconHourglassHigh size={16} />;
+
+                  return (
+                    <Menu.Item
+                      key={s}
+                      leftSection={left}
+                      onClick={() => handleSelect(s)}
+                      disabled={changing || s === row.status}
+                      color={meta.color}
+                    >
+                      {meta.label}
+                    </Menu.Item>
+                  );
+                })}
+              </Menu.Dropdown>
+            </Menu>
+          </Group>
         </Group>
 
         <Group gap="xs" wrap="nowrap">
@@ -37,7 +90,6 @@ export default function BookingCard({ row }: { row: Omit<BookingRequestsRow, 'id
           <Text size="xs" c="dimmed" style={{ fontVariantNumeric: 'tabular-nums' }}>
             {row.request_uid}
           </Text>
-
           <CopyButton value={row.request_uid}>
             {({ copied, copy }) => (
               <Tooltip label={copied ? 'Copied' : 'Copy ID'} withArrow>
@@ -54,9 +106,7 @@ export default function BookingCard({ row }: { row: Omit<BookingRequestsRow, 'id
         {/* infos principales */}
         <Stack gap={6}>
           <Line icon={<IconCamera size={16} />} label="Type" value={cap(row.photoshoot_kind)} />
-          {row.location && (
-            <Line icon={<IconMapPin size={16} />} label="Location" value={row.location} />
-          )}
+          {row.location && <Line icon={<IconMapPin size={16} />} label="Location" value={row.location} />}
           <Line icon={<IconUsers size={16} />} label="People" value={String(row.people_count)} />
         </Stack>
 
@@ -78,9 +128,7 @@ export default function BookingCard({ row }: { row: Omit<BookingRequestsRow, 'id
             <Divider my={4} />
             <Group gap="xs" align="flex-start">
               <IconNote size={16} />
-              <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
-                {row.notes}
-              </Text>
+              <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>{row.notes}</Text>
             </Group>
           </>
         )}
@@ -94,17 +142,12 @@ function Line({ icon, label, value }: { icon: React.ReactNode; label: string; va
     <Group gap={8} wrap="nowrap" justify="space-between" align="flex-start">
       <Group gap={6} wrap="nowrap">
         {icon}
-        <Text size="sm" c="dimmed">
-          {label}
-        </Text>
+        <Text size="sm" c="dimmed">{label}</Text>
       </Group>
-      <Text size="sm" fw={500} ml="auto" ta="right">
-        {value}
-      </Text>
+      <Text size="sm" fw={500} ml="auto" ta="right">{value}</Text>
     </Group>
   );
 }
-
 function cap(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
