@@ -1,7 +1,8 @@
-"use client";
+'use client';
 
-import { Stack, Select, TextInput, Group, Button } from "@mantine/core";
-import type { UseFormReturnType } from "@mantine/form";
+import { useEffect } from 'react';
+import { Button, Group, Select, Stack, TextInput } from '@mantine/core';
+import type { UseFormReturnType } from '@mantine/form';
 
 export default function Step2Details({
   form,
@@ -12,6 +13,13 @@ export default function Step2Details({
   onBack: () => void;
   onNext: () => void;
 }) {
+  // Force "Montreal" si pas déjà défini
+  useEffect(() => {
+    if (!form.values.location || form.values.location.trim() === '') {
+      form.setFieldValue('location', 'Montreal');
+    }
+  }, [form]);
+
   return (
     <Stack gap="md">
       <Select
@@ -19,14 +27,15 @@ export default function Step2Details({
         data={form.values.__photoshootOptions ?? []}
         withAsterisk
         allowDeselect={false}
-        {...form.getInputProps("photoshootKind")}
+        {...form.getInputProps('photoshootKind')}
       />
 
       <TextInput
-        label="Location (city in Quebec)"
-        placeholder="Montreal, QC"
+        label="Location"
+        description="For now, only Montreal is available."
         withAsterisk
-        {...form.getInputProps("location")}
+        disabled
+        {...form.getInputProps('location')}
       />
 
       <Group justify="space-between" mt="md">

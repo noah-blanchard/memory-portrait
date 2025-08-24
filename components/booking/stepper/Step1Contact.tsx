@@ -28,8 +28,6 @@ export type Step1Values = {
 
 const methodIcon = (m: Step1Values['contactMethod'], size = 16) => {
   switch (m) {
-    case 'email':
-      return <IconMail size={size} />;
     case 'wechat':
       return <IconBrandWechat size={size} />;
     case 'instagram':
@@ -40,7 +38,6 @@ const methodIcon = (m: Step1Values['contactMethod'], size = 16) => {
 };
 
 const placeholderByMethod: Record<Step1Values['contactMethod'], string> = {
-  email: 'jane@example.com',
   wechat: 'wechat_id',
   instagram: '@yourhandle',
   phone: '+15551234567',
@@ -62,18 +59,6 @@ export default function Step1Contact({
         {...form.getInputProps('clientName')}
       />
 
-      {/* <Group>
-        <Group gap={6} mb={8}>
-          <Text size="sm" fw={600}>
-            Contact method
-            <Text span c="red">
-              *
-            </Text>
-          </Text>
-        </Group>
-
-        
-      </Group> */}
       <Stack gap="md" w="100%">
         {/* Champ contact assorti (icône à gauche, placeholder dynamique) */}
         <TextInput
@@ -94,10 +79,6 @@ export default function Step1Contact({
           value={form.values.contactMethod}
           onChange={(v) => form.setFieldValue('contactMethod', v as Step1Values['contactMethod'])}
           data={[
-            {
-              value: 'email',
-              label: <Tooltip label="Email">{methodIcon('email', 18)}</Tooltip>,
-            },
             {
               value: 'wechat',
               label: <Tooltip label="WeChat">{methodIcon('wechat', 18)}</Tooltip>,

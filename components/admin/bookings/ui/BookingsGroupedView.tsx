@@ -4,6 +4,7 @@ import { Stack } from '@mantine/core';
 import type { BookingGrouped } from '@/schemas/bookingGrouped';
 import { STATUS_ORDER, type BookingStatus } from '../statusTheme';
 import BookingsGroup from './BookingsGroups';
+import { BookingRequestsRow } from '@/types/db-rows';
 
 export default function BookingsGroupedView({
   data,
@@ -18,7 +19,7 @@ export default function BookingsGroupedView({
         <BookingsGroup
           key={s}
           status={s}
-          items={data[s]}
+          items={data[s] as unknown as Omit<BookingRequestsRow, 'id'>[]}
           onChangeStatus={onChangeStatus}
         />
       ))}

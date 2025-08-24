@@ -36,7 +36,13 @@ export type Database = {
           contact: string
           contact_method: Database["public"]["Enums"]["contact_method"]
           created_at: string
+          dslr_addon_photos: number | null
           ends_at: string | null
+          has_ccd_canon_ixus980is: boolean
+          has_ccd_hp: boolean
+          has_dslr_nikon: boolean
+          has_phone_iphone_13: boolean
+          has_phone_iphone_x: boolean
           id: number
           language: string | null
           location: string | null
@@ -55,7 +61,13 @@ export type Database = {
           contact: string
           contact_method: Database["public"]["Enums"]["contact_method"]
           created_at?: string
+          dslr_addon_photos?: number | null
           ends_at?: string | null
+          has_ccd_canon_ixus980is?: boolean
+          has_ccd_hp?: boolean
+          has_dslr_nikon?: boolean
+          has_phone_iphone_13?: boolean
+          has_phone_iphone_x?: boolean
           id?: number
           language?: string | null
           location?: string | null
@@ -74,7 +86,13 @@ export type Database = {
           contact?: string
           contact_method?: Database["public"]["Enums"]["contact_method"]
           created_at?: string
+          dslr_addon_photos?: number | null
           ends_at?: string | null
+          has_ccd_canon_ixus980is?: boolean
+          has_ccd_hp?: boolean
+          has_dslr_nikon?: boolean
+          has_phone_iphone_13?: boolean
+          has_phone_iphone_x?: boolean
           id?: number
           language?: string | null
           location?: string | null
@@ -132,25 +150,55 @@ export type Database = {
         Returns: Json
       }
       create_booking_request: {
-        Args: {
-          p_client_name: string
-          p_contact: string
-          p_contact_method: Database["public"]["Enums"]["contact_method"]
-          p_end: string
-          p_language?: string
-          p_location?: string
-          p_notes?: string
-          p_people_count?: number
-          p_photoshoot_kind: Database["public"]["Enums"]["photoshoot_type"]
-          p_start: string
-        }
+        Args:
+          | {
+              p_client_name: string
+              p_contact: string
+              p_contact_method: Database["public"]["Enums"]["contact_method"]
+              p_dslr_addon_photos?: number
+              p_end: string
+              p_has_ccd_canon_ixus980is?: boolean
+              p_has_ccd_hp?: boolean
+              p_has_dslr_nikon?: boolean
+              p_has_phone_iphone_13?: boolean
+              p_has_phone_iphone_x?: boolean
+              p_language?: string
+              p_location?: string
+              p_notes?: string
+              p_people_count?: number
+              p_photoshoot_kind: Database["public"]["Enums"]["photoshoot_type"]
+              p_start: string
+            }
+          | {
+              p_client_name: string
+              p_contact: string
+              p_contact_method: Database["public"]["Enums"]["contact_method"]
+              p_end: string
+              p_has_ccd_canon_ixus980is?: boolean
+              p_has_ccd_hp?: boolean
+              p_has_dslr_nikon?: boolean
+              p_has_phone_iphone_13?: boolean
+              p_has_phone_iphone_x?: boolean
+              p_language?: string
+              p_location?: string
+              p_notes?: string
+              p_people_count?: number
+              p_photoshoot_kind: Database["public"]["Enums"]["photoshoot_type"]
+              p_start: string
+            }
         Returns: {
           budget_cents: number | null
           client_name: string
           contact: string
           contact_method: Database["public"]["Enums"]["contact_method"]
           created_at: string
+          dslr_addon_photos: number | null
           ends_at: string | null
+          has_ccd_canon_ixus980is: boolean
+          has_ccd_hp: boolean
+          has_dslr_nikon: boolean
+          has_phone_iphone_13: boolean
+          has_phone_iphone_x: boolean
           id: number
           language: string | null
           location: string | null
@@ -400,7 +448,13 @@ export type Database = {
           contact: string
           contact_method: Database["public"]["Enums"]["contact_method"]
           created_at: string
+          dslr_addon_photos: number | null
           ends_at: string | null
+          has_ccd_canon_ixus980is: boolean
+          has_ccd_hp: boolean
+          has_dslr_nikon: boolean
+          has_phone_iphone_13: boolean
+          has_phone_iphone_x: boolean
           id: number
           language: string | null
           location: string | null
@@ -425,7 +479,13 @@ export type Database = {
           contact: string
           contact_method: Database["public"]["Enums"]["contact_method"]
           created_at: string
+          dslr_addon_photos: number | null
           ends_at: string | null
+          has_ccd_canon_ixus980is: boolean
+          has_ccd_hp: boolean
+          has_dslr_nikon: boolean
+          has_phone_iphone_13: boolean
+          has_phone_iphone_x: boolean
           id: number
           language: string | null
           location: string | null

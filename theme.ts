@@ -101,7 +101,7 @@ export const theme: MantineThemeOverride = createTheme({
     Button: {
       defaultProps: {
         size: 'md',
-        radius: 'lg',
+        radius: 'xl',
         variant: 'filled',
         color: 'babyBlue',
       },
@@ -134,7 +134,7 @@ export const theme: MantineThemeOverride = createTheme({
     },
 
     TextInput: {
-      defaultProps: { radius: 'md' },
+      defaultProps: { radius: 'xl' },
       styles: (theme: MantineTheme) => ({
         input: {
           backgroundColor: '#fff',
@@ -164,7 +164,7 @@ export const theme: MantineThemeOverride = createTheme({
     },
 
     Select: {
-      defaultProps: { radius: 'md', checkIconPosition: 'right' },
+      defaultProps: { radius: 'xl', checkIconPosition: 'right' },
       styles: (theme: MantineTheme) => ({
         input: {
           backgroundColor: '#fff',

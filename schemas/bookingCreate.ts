@@ -41,28 +41,36 @@ export const bookingCreateSchema = z
       .transform((s) => s.trim())
       .optional()
       .default(undefined),
+
+    // --------- ÉQUIPEMENTS ----------
+    equipCanonIxus980is: z.boolean().default(false),
+    equipHpCcd: z.boolean().default(false),
+    equipIphoneX: z.boolean().default(false),
+    equipIphone13: z.boolean().default(false),
+    equipNikonDslr: z.boolean().default(false),
+
+    // Add-on DSLR (nombre de photos) :
+    // nullable/opcional, mais obligatoire (>=3) quand DSLR + (CCD ou Phone)
+    dslrAddonPhotos: z.coerce
+      .number()
+      .int()
+      .min(3, 'At least 3 photos for DSLR add-on')
+      .optional()
+      .nullable(),
   })
   .superRefine((val, ctx) => {
+    // 1) période valide
     if (val.start.getTime() >= val.end.getTime()) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['end'],
-        message: 'End must be after start',
-      });
+      ctx.addIssue({ code: 'custom', path: ['end'], message: 'End must be after start' });
     }
 
+    // 2) contact valide selon méthode
     const c = val.contact;
     switch (val.contactMethod) {
       case 'email': {
-        const email = z.email();
-        const r = email.safeParse(c);
-        if (!r.success) {
-          ctx.addIssue({
-            code: 'custom',
-            path: ['contact'],
-            message: 'Invalid email',
-          });
-        }
+        const r = z.string().email().safeParse(c);
+        if (!r.success)
+          ctx.addIssue({ code: 'custom', path: ['contact'], message: 'Invalid email' });
         break;
       }
       case 'wechat': {
@@ -100,15 +108,53 @@ export const bookingCreateSchema = z
         break;
       }
     }
+
+    // 3) au moins un équipement
+    const anyEquip =
+      val.equipCanonIxus980is ||
+      val.equipHpCcd ||
+      val.equipIphoneX ||
+      val.equipIphone13 ||
+      val.equipNikonDslr;
+
+    if (!anyEquip) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['equipCanonIxus980is'],
+        message: 'Select at least one equipment',
+      });
+    }
+
+    // 4) règles add-on DSLR
+    const hasCCDorPhone =
+      val.equipCanonIxus980is || val.equipHpCcd || val.equipIphoneX || val.equipIphone13;
+    const hasDSLR = val.equipNikonDslr;
+
+    if (hasDSLR && hasCCDorPhone) {
+      // combo => add-on requis (>=3)
+      if (val.dslrAddonPhotos == null) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['dslrAddonPhotos'],
+          message: 'Please set DSLR add-on photos (min 3) when mixing DSLR with CCD/Phone',
+        });
+      }
+    } else {
+      // pas combo => add-on interdit
+      if (val.dslrAddonPhotos != null) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['dslrAddonPhotos'],
+          message: 'DSLR add-on is only allowed when DSLR is combined with CCD/Phone',
+        });
+      }
+    }
   })
   .transform((v) => {
     let contact = v.contact;
-    if (v.contactMethod === 'instagram' || v.contactMethod === 'wechat') {
+    if (v.contactMethod === 'instagram' || v.contactMethod === 'wechat')
       contact = contact.toLowerCase();
-    }
-    if (v.contactMethod === 'phone') {
-      contact = stripPhone(contact);
-    }
+    if (v.contactMethod === 'phone') contact = stripPhone(contact);
     return { ...v, contact };
   });
 

@@ -1,15 +1,15 @@
-import { bookingCreateSchema } from "@/schemas/bookingCreate";
-import { json } from "@/utils/api/helpers";
-import { createBookingArgs } from "./helpers";
-import { createServerClient } from "@/utils/supabase/server";
-import { NextResponse } from "next/server";
-import { bookingGroupedSchema } from "@/schemas/bookingGrouped";
+import { NextResponse } from 'next/server';
+import { bookingCreateSchema } from '@/schemas/bookingCreate';
+import { bookingGroupedSchema } from '@/schemas/bookingGrouped';
+import { json } from '@/utils/api/helpers';
+import { createServerClient } from '@/utils/supabase/server';
+import { createBookingArgs } from './helpers';
 
 export async function POST(req: Request) {
-  const ct = req.headers.get("content-type") ?? "";
-  if (!ct.includes("application/json")) {
+  const ct = req.headers.get('content-type') ?? '';
+  if (!ct.includes('application/json')) {
     return json(
-      { ok: false, error: { code: "invalid_content_type", message: "Expected application/json" } },
+      { ok: false, error: { code: 'invalid_content_type', message: 'Expected application/json' } },
       415
     );
   }
@@ -18,7 +18,10 @@ export async function POST(req: Request) {
   try {
     payload = await req.json();
   } catch {
-    return json({ ok: false, error: { code: "invalid_json", message: "Body must be valid JSON" } }, 400);
+    return json(
+      { ok: false, error: { code: 'invalid_json', message: 'Body must be valid JSON' } },
+      400
+    );
   }
 
   const parsed = bookingCreateSchema.safeParse(payload);
@@ -27,10 +30,10 @@ export async function POST(req: Request) {
       {
         ok: false,
         error: {
-          code: "validation_error",
-          message: "Invalid request body",
+          code: 'validation_error',
+          message: 'Invalid request body',
           issues: parsed.error.issues.map((i) => ({
-            path: i.path.join("."),
+            path: i.path.join('.'),
             message: i.message,
             code: i.code,
           })),
@@ -41,35 +44,39 @@ export async function POST(req: Request) {
   }
 
   const args = createBookingArgs(parsed.data);
+
   try {
-    const supabase = await createServerClient()
-    const { data, error } = await supabase.rpc("create_booking_request", args);
+    const supabase = await createServerClient();
+    const { data, error } = await supabase.rpc('create_booking_request', args);
 
     if (error) {
-      const code = (error.code || "").toLowerCase();
-      const msg = error.message || "Database error";
+      const code = (error.code || '').toLowerCase();
+      const msg = error.message || 'Database error';
 
-      if (msg.toLowerCase().includes("overlaps an unavailable period")) {
+      if (msg.toLowerCase().includes('overlaps an unavailable period')) {
         return json(
-          { ok: false, error: { code: "slot_unavailable", message: "Requested slot is unavailable." } },
+          {
+            ok: false,
+            error: { code: 'slot_unavailable', message: 'Requested slot is unavailable.' },
+          },
           409
         );
       }
-
-      if (["22007", "22023", "22003"].includes(code) || /must be|invalid/i.test(msg)) {
-        return json({ ok: false, error: { code: "bad_request", message: msg } }, 400);
+      if (['22007', '22023', '22003'].includes(code) || /must be|invalid/i.test(msg)) {
+        return json({ ok: false, error: { code: 'bad_request', message: msg } }, 400);
       }
-
-      if (code === "23514" || code === "check_violation") {
-        return json({ ok: false, error: { code: "constraint_violation", message: msg } }, 409);
+      if (code === '23514' || code === 'check_violation') {
+        return json({ ok: false, error: { code: 'constraint_violation', message: msg } }, 409);
       }
-
-      return json({ ok: false, error: { code: "rpc_error", message: msg } }, 500);
+      return json({ ok: false, error: { code: 'rpc_error', message: msg } }, 500);
     }
 
     return json({ ok: true, data }, 201);
   } catch (e: any) {
-    return json({ ok: false, error: { code: "server_error", message: e?.message ?? "Unexpected error" } }, 500);
+    return json(
+      { ok: false, error: { code: 'server_error', message: e?.message ?? 'Unexpected error' } },
+      500
+    );
   }
 }
 
