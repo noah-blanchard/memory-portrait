@@ -3,6 +3,13 @@ import { z } from 'zod';
 import { ContactMethodEnum, PhotoshootTypeEnum } from './enums';
 import { normalizeWhitespace, stripPhone } from './helpers';
 
+function msToH(ms: number) {
+  const totalSeconds = Math.floor(ms / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  return { hours, minutes };
+}
+
 export const bookingCreateSchema = z
   .object({
     clientName: z.string().transform(normalizeWhitespace).pipe(z.string().min(1).max(120)),
@@ -77,7 +84,7 @@ export const bookingCreateSchema = z
     const c = val.contact;
     switch (val.contactMethod) {
       case 'email': {
-        const r = z.string().email().safeParse(c);
+        const r = z.email().safeParse(c);
         if (!r.success)
           ctx.addIssue({ code: 'custom', path: ['contact'], message: 'Invalid email' });
         break;
@@ -141,7 +148,7 @@ export const bookingCreateSchema = z
 
     const duration = val.end.getTime() - val.start.getTime();
 
-    if (hasDSLR && hasCCDorPhone && duration < 2) {
+    if (hasDSLR && hasCCDorPhone && msToH(duration).hours < 2) {
       if (val.dslrAddonPhotos == null) {
         ctx.addIssue({
           code: 'custom',

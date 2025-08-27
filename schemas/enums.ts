@@ -1,14 +1,7 @@
 import { z } from 'zod';
 
 export const ContactMethods = ['email', 'wechat', 'instagram', 'phone'] as const;
-export const PhotoshootTypes = [
-  'tourism',
-  'linkedin',
-  'event',
-  'family',
-  'portrait',
-  'product',
-] as const;
+export const PhotoshootTypes = ['portrait', 'tourism', 'family', 'linkedin', 'event'] as const;
 export const BookingStatuses = [
   'pending',
   'approved',

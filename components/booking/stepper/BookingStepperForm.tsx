@@ -56,7 +56,7 @@ export default function BookingStepperForm() {
       contactMethod: 'wechat',
       contact: '',
       // step 2
-      photoshootKind: 'linkedin',
+      photoshootKind: 'portrait',
       location: 'Montreal',
       peopleCount: 1,
       // step 3

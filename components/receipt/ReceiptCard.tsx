@@ -194,7 +194,7 @@ export default function ReceiptCard({
                 {/* Type de package */}
                 <Row label="Package" value={cap(pricing.package.replace('_', ' '))} />
                 <Row label="Included edits" value={`${pricing.includedEdits}`} />
-                {data?.extraEdits && <Row label="Extra edits" value={`${data.extraEdits}`} />}
+                {data?.extraEdits !== 0 && <Row label="Extra edits" value={`${data.extraEdits}`} />}
                 {line}
 
                 <Text size="sm" fw={900} tt="uppercase" mt={4}>
@@ -264,7 +264,7 @@ export default function ReceiptCard({
 
                 {/* Transportation fee */}
                 {pricing.transportationFee > 0 && (
-                  <RowCurrency label="Transportation fee" amount={pricing.transportationFee} />
+                  <RowCurrency label="Transportation fee (avg.)" amount={pricing.transportationFee} />
                 )}
 
                 {/* Add-on DSLR (si applicable) */}

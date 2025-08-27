@@ -2,20 +2,10 @@
 
 import { useEffect } from 'react';
 import { IconAperture, IconCamera, IconDeviceMobile, IconInfoCircle } from '@tabler/icons-react';
-import {
-  Alert,
-  Badge,
-  Button,
-  Card,
-  Group,
-  NumberInput,
-  Stack,
-  Switch,
-  Text,
-  Title,
-} from '@mantine/core';
+import { Alert, Badge, Button, Card, Group, NumberInput, Stack, Switch, Text, Title } from '@mantine/core';
 import type { UseFormReturnType } from '@mantine/form';
 import ButtonNumberInput from '@/components/number/NumberInput';
+
 
 type Props = {
   form: UseFormReturnType<any>;
@@ -87,13 +77,13 @@ export default function Step3Equipment({ form, loading, onBack, onNext }: Props)
 
         <Stack gap="xs">
           <EquipSwitch
-            title="Canon ixus980is"
+            title="CCD • Canon ixus980is"
             note="Soft warm tones • cool white skin tones"
             disabled={dslrExclusive || includesCcdPhone}
             {...form.getInputProps('equipCanonIxus980is', { type: 'checkbox' })}
           />
           <EquipSwitch
-            title="HP (CCD)"
+            title="CCD • HP"
             note="Vintage look • great flash (iPhone 5s vibes)"
             disabled={dslrExclusive || includesCcdPhone}
             {...form.getInputProps('equipHpCcd', { type: 'checkbox' })}
@@ -136,7 +126,7 @@ export default function Step3Equipment({ form, loading, onBack, onNext }: Props)
         </Group>
 
         <EquipSwitch
-          title="Nikon (DSLR)"
+          title="DSLR • Nikon"
           readOnly={isQuebecCity || loading}
           disabled={loading} // verrouillé à QC
           {...form.getInputProps('equipNikonDslr', { type: 'checkbox' })}
