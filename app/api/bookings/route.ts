@@ -5,6 +5,7 @@ import { json } from '@/utils/api/helpers';
 import { createServerClient } from '@/utils/supabase/server';
 import { createBookingArgs } from './helpers';
 
+
 export async function POST(req: Request) {
   const ct = req.headers.get('content-type') ?? '';
   if (!ct.includes('application/json')) {

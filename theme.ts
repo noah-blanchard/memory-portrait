@@ -1,11 +1,12 @@
 // src/theme.ts
-import { createTheme, getThemeColor, rem } from '@mantine/core';
+import { createTheme, getThemeColor, InputLabel, NativeSelect, rem, SegmentedControl } from '@mantine/core';
 import type {
   ButtonProps,
   MantineColor,
   MantineTheme,
   MantineThemeColors,
   MantineThemeOverride,
+  SegmentedControlProps,
 } from '@mantine/core';
 
 export const theme: MantineThemeOverride = createTheme({
@@ -134,7 +135,7 @@ export const theme: MantineThemeOverride = createTheme({
     },
 
     TextInput: {
-      defaultProps: { radius: 'xl' },
+      defaultProps: { radius: 'xl', size: 'lg' },
       styles: (theme: MantineTheme) => ({
         input: {
           backgroundColor: '#fff',
@@ -146,6 +147,90 @@ export const theme: MantineThemeOverride = createTheme({
         },
         label: { fontWeight: 600 },
       }),
+    },
+
+    NumberInput: {
+      defaultProps: { radius: 'xl', size: 'lg' },
+      styles: (theme: MantineTheme) => ({
+        input: {
+          backgroundColor: '#fff',
+          borderColor: theme.colors.mist[3],
+          '&:focus, &:focus-within': {
+            borderColor: theme.colors.babyBlue[6],
+            boxShadow: `0 0 0 3px ${theme.colors.babyBlue[1]}`,
+          },
+        },
+        label: { fontWeight: 600 },
+      }),
+    },
+
+    SegmentedControl: {
+      defaultProps: {
+        radius: 'xl',
+        color: 'babyBlue',
+        fullWidth: true,
+        size: 'lg',
+        bg: 'babyBlue.2',
+      },
+      styles: (theme: MantineTheme) => ({
+        root: {
+          background: 'var(--mantine-color-babyBlue-0)',
+        },
+        control: {
+          flex: 1, // chaque item prend la même largeur
+        },
+        innerLabel: {
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
+        },
+      }),
+    },
+
+    DatePickerInput: {
+      defaultProps: {
+        size: 'lg',
+        radius: 'xl',
+      },
+      styles: (theme: MantineTheme) => ({
+        input: {
+          backgroundColor: '#fff',
+          borderColor: theme.colors.mist[3],
+          '&:focus, &:focus-within': {
+            borderColor: theme.colors.babyBlue[6],
+            boxShadow: `0 0 0 3px ${theme.colors.babyBlue[1]}`,
+          },
+        },
+        label: { fontWeight: 600 },
+      }),
+    },
+
+    TimePicker: {
+      defaultProps: {
+        size: 'lg',
+        radius: 'xl',
+      },
+    },
+
+
+    NativeSelect: {
+      defaultProps: { radius: 'xl', size: 'lg' },
+      styles: (theme: MantineTheme) => ({
+        input: {
+          backgroundColor: '#fff',
+          borderColor: theme.colors.mist[3],
+          '&:focus, &:focus-within': {
+            borderColor: theme.colors.babyBlue[6],
+            boxShadow: `0 0 0 3px ${theme.colors.babyBlue[1]}`,
+          },
+        },
+        label: { fontWeight: 600 },
+      }),
+    },
+
+    InputLabel: {
+      defaultProps: { required: true, fw: 600, size: 'lg' },
     },
 
     Textarea: {

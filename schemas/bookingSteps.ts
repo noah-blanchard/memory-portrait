@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { bookingCreateSchema, type BookingCreateInput } from './bookingCreate';
 import { ContactMethodEnum, PhotoshootTypeEnum } from './enums';
 
+
 /* --- mêmes petits helpers que dans bookingCreate --- */
 const normalizeWhitespace = (s: string) => s.replace(/\s+/g, ' ').trim();
 const stripPhone = (s: string) => s.replace(/[^\d+]/g, '');
@@ -84,7 +85,8 @@ export const step2Schema = z.object({
 export const step3Schema = z.object({
   date: z.coerce.date(),
   time: z.string().regex(/^\d{2}:\d{2}$/, 'Pick a time (HH:mm)'),
-  durationHours: z.number().int().min(1).max(4),
+  durationHours: z.number().int().min(1),
+  extraEdits: z.number().min(0).optional(),
 });
 
 export const step4Schema = z
@@ -95,12 +97,22 @@ export const step4Schema = z
     equipIphone13: z.boolean(),
     equipNikonDslr: z.boolean(),
 
-    // Nombre de photos DSLR en add-on – laissé vide sinon.
-    // On tolère les valeurs string/'' venant d'un NumberInput.
+    // Durée (pour gérer la règle "DSLR ≥ 2h => CCD/Phone inclus")
+    durationHours: z.preprocess(
+      (v) => {
+        if (v === '' || v === null || typeof v === 'undefined') return undefined;
+        const n = typeof v === 'string' ? Number(v) : v;
+        return Number.isFinite(n) ? n : undefined;
+      },
+      z.number("Enter duration").int().min(1, 'Minimum 1 hour')
+    ),
+
+    // Add-on DSLR : optionnel, min 3 si présent
     dslrAddonPhotos: z.preprocess((v) => {
       if (v === '' || v === null || typeof v === 'undefined') return undefined;
       if (typeof v === 'string' && v.trim() === '') return undefined;
-      return v;
+      const n = typeof v === 'string' ? Number(v) : v;
+      return Number.isFinite(n) ? n : v;
     }, z.number('Enter a number').int().min(3).optional()),
   })
   .superRefine((v, ctx) => {
@@ -108,43 +120,47 @@ export const step4Schema = z
     const hasPhone = v.equipIphoneX || v.equipIphone13;
     const hasCcdOrPhone = hasCCD || hasPhone;
     const hasDslr = v.equipNikonDslr;
-    const addOn = hasDslr && hasCcdOrPhone;
+
+    const includesCcdPhone = !!hasDslr && Number(v.durationHours) >= 2;
 
     // 1) Au moins un équipement
     if (!hasDslr && !hasCcdOrPhone) {
       ctx.addIssue({
         code: 'custom',
-        path: ['equipCanonIxus980is'], // ancre l’erreur sur le 1er champ
+        path: ['equipCanonIxus980is'],
         message: 'Please select at least one equipment option',
       });
     }
 
-    // 2) DSLR + (CCD/Phone) => add-on requis
-    if (addOn && typeof v.dslrAddonPhotos === 'undefined') {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['dslrAddonPhotos'],
-        message: 'Add-on required when DSLR is combined with CCD/Phone (minimum 3 photos).',
-      });
-    }
-
-    // 3) DSLR seul => pas d’add-on autorisé
-    if (hasDslr && !hasCcdOrPhone && typeof v.dslrAddonPhotos !== 'undefined') {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['dslrAddonPhotos'],
-        message: 'Remove this value when selecting DSLR alone (add-on only with CCD/Phone).',
-      });
-    }
-
-    // 4) Pas de DSLR => pas d’add-on
+    // 2) Add-on interdit si pas de DSLR
     if (!hasDslr && typeof v.dslrAddonPhotos !== 'undefined') {
       ctx.addIssue({
         code: 'custom',
         path: ['dslrAddonPhotos'],
-        message: 'DSLR add-on is only available when DSLR is selected.',
+        message: 'DSLR add-on is only available when Nikon (DSLR) is selected.',
       });
     }
+
+    // 3) Add-on interdit si DSLR seul (pas de CCD/Phone)
+    if (hasDslr && !hasCcdOrPhone && typeof v.dslrAddonPhotos !== 'undefined') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['dslrAddonPhotos'],
+        message: 'Add-on only with CCD/Phone packages (not with DSLR alone).',
+      });
+    }
+
+    // 4) Add-on interdit quand Nikon + durée ≥ 2h (CCD/Phone inclus gratuitement)
+    if (includesCcdPhone && typeof v.dslrAddonPhotos !== 'undefined') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['dslrAddonPhotos'],
+        message: 'With Nikon 2h+, CCD/Phone are included — DSLR add-on not applicable.',
+      });
+    }
+
+    // ✅ Plus d’obligation d’add-on quand DSLR est combiné avec CCD/Phone
+    // (si hasDslr && hasCcdOrPhone && durée < 2h ⇒ add-on facultatif)
   });
 
 export type Step1 = z.infer<typeof step1Schema>;
@@ -185,6 +201,7 @@ export function buildAndValidateBooking(s1: Step1, s2: Step2, s3: Step3, s4: Ste
     equipIphoneX: !!s4?.equipIphoneX,
     equipIphone13: !!s4?.equipIphone13,
     equipNikonDslr: !!s4?.equipNikonDslr,
+    extraEdits: s3?.extraEdits ?? 0,
   };
 
   // Validation + transforms (normalisation contact, checks cross-field, etc.)

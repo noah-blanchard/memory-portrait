@@ -1,22 +1,17 @@
 'use client';
 
 import {
-  IconAt,
   IconBrandInstagram,
   IconBrandWechat,
-  IconMail,
-  IconPhone,
 } from '@tabler/icons-react';
 import {
   Button,
   Flex,
   Group,
-  rem,
-  SegmentedControl,
+  NativeSelect,
+  
   Stack,
-  Text,
   TextInput,
-  Tooltip,
 } from '@mantine/core';
 import type { UseFormReturnType } from '@mantine/form';
 
@@ -32,15 +27,12 @@ const methodIcon = (m: Step1Values['contactMethod'], size = 16) => {
       return <IconBrandWechat size={size} />;
     case 'instagram':
       return <IconBrandInstagram size={size} />;
-    case 'phone':
-      return <IconPhone size={size} />;
   }
 };
 
 const placeholderByMethod: Record<Step1Values['contactMethod'], string> = {
   wechat: 'wechat_id',
-  instagram: '@yourhandle',
-  phone: '+15551234567',
+  instagram: 'instagram_username',
 };
 
 export default function Step1Contact({
@@ -60,17 +52,32 @@ export default function Step1Contact({
       />
 
       <Stack gap="md" w="100%">
+        <NativeSelect
+          withAsterisk
+          label="Contact"
+          leftSection={methodIcon(form.values.contactMethod, 18)}
+          data={[
+            { value: 'wechat', label: 'WeChat' },
+            { value: 'instagram', label: 'Instagram' },
+          ]}
+          value={form.values.contactMethod}
+          onChange={(event) =>
+            form.setFieldValue(
+              'contactMethod',
+              event.currentTarget.value as Step1Values['contactMethod']
+            )
+          }
+        />
         {/* Champ contact assorti (icône à gauche, placeholder dynamique) */}
         <TextInput
           style={{ flex: 1 }} // pour prendre le reste de l'espace
           mt="xs"
-          label="Contact"
           leftSection={methodIcon(form.values.contactMethod, 18)}
           placeholder={placeholderByMethod[form.values.contactMethod]}
           withAsterisk
           {...form.getInputProps('contact')}
         />
-        <SegmentedControl
+        {/* <SegmentedControl
           fullWidth
           size="lg"
           radius="xl"
@@ -112,7 +119,7 @@ export default function Step1Contact({
               boxShadow: `inset 0 0 0 2px var(--mantine-color-babyBlue-4)`,
             },
           }}
-        />
+        /> */}
       </Stack>
 
       <Group justify="space-between" mt="md">

@@ -57,6 +57,15 @@ export const bookingCreateSchema = z
       .min(3, 'At least 3 photos for DSLR add-on')
       .optional()
       .nullable(),
+
+    // --------- RETOUCHES SUPPLÉMENTAIRES ----------
+    // Nombre d’allers-retours de retouche supplémentaires au-delà de ce qui est inclus
+    extraEdits: z.coerce
+      .number()
+      .int()
+      .min(0, 'extraEdits must be >= 0')
+      .max(20, 'extraEdits too large')
+      .default(0),
   })
   .superRefine((val, ctx) => {
     // 1) période valide
@@ -125,13 +134,14 @@ export const bookingCreateSchema = z
       });
     }
 
-    // 4) règles add-on DSLR
+    // 4) règles add-on DSLR (inchangées)
     const hasCCDorPhone =
       val.equipCanonIxus980is || val.equipHpCcd || val.equipIphoneX || val.equipIphone13;
     const hasDSLR = val.equipNikonDslr;
 
-    if (hasDSLR && hasCCDorPhone) {
-      // combo => add-on requis (>=3)
+    const duration = val.end.getTime() - val.start.getTime();
+
+    if (hasDSLR && hasCCDorPhone && duration < 2) {
       if (val.dslrAddonPhotos == null) {
         ctx.addIssue({
           code: 'custom',
@@ -140,7 +150,6 @@ export const bookingCreateSchema = z
         });
       }
     } else {
-      // pas combo => add-on interdit
       if (val.dslrAddonPhotos != null) {
         ctx.addIssue({
           code: 'custom',

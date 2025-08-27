@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect } from 'react';
+import { IconAperture, IconCamera, IconDeviceMobile, IconInfoCircle } from '@tabler/icons-react';
 import {
+  Alert,
   Badge,
   Button,
   Card,
@@ -11,10 +13,9 @@ import {
   Switch,
   Text,
   Title,
-  Alert,
 } from '@mantine/core';
-import { IconAperture, IconCamera, IconDeviceMobile, IconInfoCircle } from '@tabler/icons-react';
 import type { UseFormReturnType } from '@mantine/form';
+import ButtonNumberInput from '@/components/number/NumberInput';
 
 type Props = {
   form: UseFormReturnType<any>;
@@ -31,17 +32,47 @@ export default function Step3Equipment({ form, loading, onBack, onNext }: Props)
   const hasCcdOrPhone = hasCCD || hasPhone;
   const hasDslr = !!v.equipNikonDslr;
 
+  const isQuebecCity = v.location === 'Quebec City';
+
+  // Nikon sélectionné + durée >= 2h => CCD/Phone inclus
+  const includesCcdPhone = hasDslr && Number(v.durationHours) >= 2;
+
   // DSLR en add-on uniquement si on a déjà un package CCD/Phone
   const dslrAsAddon = hasDslr && hasCcdOrPhone;
   // DSLR seul => on bloque CCD/Phone (packages exclusifs)
   const dslrExclusive = hasDslr && !hasCcdOrPhone;
 
+  // ✅ Québec City : Nikon obligatoire → auto-select + verrouillage
+  useEffect(() => {
+    if (isQuebecCity && !hasDslr) {
+      form.setFieldValue('equipNikonDslr', true);
+    }
+  }, [isQuebecCity, hasDslr, form]);
+
+  // ✅ Nikon 2h+ : auto-select CCD/Phone car inclus
+  useEffect(() => {
+    if (includesCcdPhone) {
+      if (!v.equipCanonIxus980is) form.setFieldValue('equipCanonIxus980is', true);
+      if (!v.equipHpCcd) form.setFieldValue('equipHpCcd', true);
+      if (!v.equipIphoneX) form.setFieldValue('equipIphoneX', true);
+      if (!v.equipIphone13) form.setFieldValue('equipIphone13', true);
+    }
+  }, [
+    includesCcdPhone,
+    v.equipCanonIxus980is,
+    v.equipHpCcd,
+    v.equipIphoneX,
+    v.equipIphone13,
+    form,
+  ]);
+
   // Nettoyage du nombre de photos si l'add-on n'est plus applicable
   useEffect(() => {
-    if (!dslrAsAddon && v.dslrAddonPhotos != null) {
+    if (!(dslrAsAddon && !includesCcdPhone) && v.dslrAddonPhotos != null) {
+      // add-on DSLR affiché uniquement quand DSLR est en add-on (pack principal = CCD/Phone)
       form.setFieldValue('dslrAddonPhotos', undefined);
     }
-  }, [dslrAsAddon, v.dslrAddonPhotos, form]);
+  }, [dslrAsAddon, includesCcdPhone, v.dslrAddonPhotos, form]);
 
   return (
     <Stack gap="lg">
@@ -51,19 +82,20 @@ export default function Step3Equipment({ form, loading, onBack, onNext }: Props)
           <IconCamera size={18} />
           <Title order={5}>CCD Cameras</Title>
           <Badge variant="light">2</Badge>
+          {includesCcdPhone && <Badge color="green">Included (≥ 2h DSLR)</Badge>}
         </Group>
 
         <Stack gap="xs">
           <EquipSwitch
             title="Canon ixus980is"
-            note="Soft warm tones / cool white skin tones"
-            disabled={dslrExclusive} // bloqué si DSLR seul
+            note="Soft warm tones • cool white skin tones"
+            disabled={dslrExclusive || includesCcdPhone}
             {...form.getInputProps('equipCanonIxus980is', { type: 'checkbox' })}
           />
           <EquipSwitch
             title="HP (CCD)"
             note="Vintage look • great flash (iPhone 5s vibes)"
-            disabled={dslrExclusive}
+            disabled={dslrExclusive || includesCcdPhone}
             {...form.getInputProps('equipHpCcd', { type: 'checkbox' })}
           />
         </Stack>
@@ -75,19 +107,20 @@ export default function Step3Equipment({ form, loading, onBack, onNext }: Props)
           <IconDeviceMobile size={18} />
           <Title order={5}>Phones</Title>
           <Badge variant="light">2</Badge>
+          {includesCcdPhone && <Badge color="green">Included (≥ 2h DSLR)</Badge>}
         </Group>
 
         <Stack gap="xs">
           <EquipSwitch
             title="iPhone X"
             note="Natural skin softening • ambiance king"
-            disabled={dslrExclusive}
+            disabled={dslrExclusive || includesCcdPhone}
             {...form.getInputProps('equipIphoneX', { type: 'checkbox' })}
           />
           <EquipSwitch
             title="iPhone 13"
             note="Latest gen colors"
-            disabled={dslrExclusive}
+            disabled={dslrExclusive || includesCcdPhone}
             {...form.getInputProps('equipIphone13', { type: 'checkbox' })}
           />
         </Stack>
@@ -99,16 +132,18 @@ export default function Step3Equipment({ form, loading, onBack, onNext }: Props)
           <IconAperture size={18} />
           <Title order={5}>DSLR</Title>
           <Badge variant="light">1</Badge>
+          {isQuebecCity && <Badge color="red">Required in Quebec City</Badge>}
         </Group>
 
         <EquipSwitch
           title="Nikon (DSLR)"
-          // Pas besoin de disabled ici : c'est l'élément qui impose l'exclusivité
+          readOnly={isQuebecCity || loading}
+          disabled={loading} // verrouillé à QC
           {...form.getInputProps('equipNikonDslr', { type: 'checkbox' })}
         />
 
-        {/* Add-on : visible uniquement si DSLR + (CCD ou Phone) */}
-        {dslrAsAddon && (
+        {/* Add-on : visible uniquement si DSLR + (CCD ou Phone) ET pas en mode "inclus" */}
+        {dslrAsAddon && !includesCcdPhone && (
           <NumberInput
             mt="sm"
             label="DSLR photos (add-on)"
@@ -124,14 +159,21 @@ export default function Step3Equipment({ form, loading, onBack, onNext }: Props)
         )}
       </Card>
 
-      {/* Messages d’aide */}
-      {dslrExclusive ? (
+      {isQuebecCity ? (
+        <Alert color="red" icon={<IconInfoCircle size={16} />}>
+          <b>Nikon (DSLR)</b> is required in <b>Quebec City</b>.
+        </Alert>
+      ) : includesCcdPhone ? (
+        <Alert color="green" icon={<IconInfoCircle size={16} />}>
+          <b>CCD &amp; Phone</b> included with <b>2h+</b> <b>Nikon (DSLR)</b>.
+        </Alert>
+      ) : dslrExclusive ? (
         <Alert color="yellow" icon={<IconInfoCircle size={16} />}>
-          <b>DSLR package</b> is selected: CCD and Phone packages are disabled (exclusive).
+          <b>DSLR</b> selected: CCD and Phone disabled.
         </Alert>
       ) : (
         <Text size="sm" c="dimmed">
-          Choose any <b>CCD / Phone</b> package. You may then add <b>DSLR photos</b> as an add-on.
+          Select <b>CCD / Phone</b>. Add <b>DSLR photos</b> as an add-on.
         </Text>
       )}
 
@@ -162,7 +204,7 @@ function EquipSwitch({
       label={title}
       description={note}
       styles={(theme) => ({
-        body: { alignItems: 'flex-start' }, // aligne bien le label/description avec le thumb
+        body: { alignItems: 'flex-start' },
         label: { fontWeight: 600, lineHeight: 1.2 },
         description: {
           lineHeight: 1.2,

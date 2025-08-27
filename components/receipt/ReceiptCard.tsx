@@ -5,24 +5,14 @@ import { useEffect, useState } from 'react';
 import { Roboto_Mono } from 'next/font/google';
 import { IconCheck, IconCopy, IconDownload } from '@tabler/icons-react';
 import html2canvas from 'html2canvas';
-import {
-  Box,
-  Button,
-  Collapse,
-  CopyButton,
-  Group,
-  Paper,
-  Stack,
-  Text,
-  Tooltip,
-  Transition,
-} from '@mantine/core';
-import { estimatePrice } from '../booking/stepper/helpers';
+import { Box, Button, Collapse, CopyButton, Group, Paper, Stack, Text, Tooltip, Transition } from '@mantine/core';
+import { estimatePrice, RATES } from '../booking/stepper/helpers';
+
 
 const receiptFont = Roboto_Mono({ subsets: ['latin'], weight: '400' });
 
 // ——— compact sizing
-const BASE_FONT_SIZE_PX = 12; // ↓ plus petit
+const BASE_FONT_SIZE_PX = 12;
 const BASE_LINE_HEIGHT = 1.15;
 
 export type ReceiptData = {
@@ -36,7 +26,7 @@ export type ReceiptData = {
   start: string;
   end: string;
   durationHours: number;
-  location?: string | null;
+  location: 'Montreal' | 'Quebec City';
   peopleCount?: number;
   dslrAddonPhotos?: number | null;
   equipCanonIxus980is?: boolean;
@@ -44,6 +34,7 @@ export type ReceiptData = {
   equipIphoneX?: boolean;
   equipIphone13?: boolean;
   equipNikonDslr?: boolean;
+  extraEdits?: number;
 };
 
 export default function ReceiptCard({
@@ -100,9 +91,11 @@ export default function ReceiptCard({
   const anyEquip = hasCCD || hasPhones || hasDSLR;
 
   const pricing = estimatePrice({
+    location: data.location ?? 'Montreal',
     people: data.peopleCount ?? 1,
     durationHours: data.durationHours,
     addonPhotos: data.dslrAddonPhotos ?? 0,
+    extraEdits: data.extraEdits ?? 0,
     equipment: {
       equipCanonIxus980is: !!data.equipCanonIxus980is,
       equipHpCcd: !!data.equipHpCcd,
@@ -111,6 +104,11 @@ export default function ReceiptCard({
       equipNikonDslr: !!data.equipNikonDslr,
     },
   });
+
+  // Infos additionnelles pour l’affichage
+  const extraPersons = Math.max(0, (data.peopleCount ?? 1) - 1);
+  const includesCcdPhone = hasDSLR && pricing.package === 'DSLR' && pricing.hours >= 2;
+  const durationMinEnforced = pricing.hours !== Math.ceil(Math.max(1, data.durationHours || 1));
 
   return (
     <Stack align="center" gap="sm" w="100%" h="100%">
@@ -126,7 +124,7 @@ export default function ReceiptCard({
               shadow="sm"
               withBorder
               radius="md"
-              p="md" // ↓ padding réduit
+              p="md"
               className={receiptFont.className}
               maw={420}
               w="100%"
@@ -134,7 +132,7 @@ export default function ReceiptCard({
               style={{
                 borderStyle: 'dashed',
                 overflow: 'hidden',
-                fontSize: BASE_FONT_SIZE_PX, // ↓ police réduite
+                fontSize: BASE_FONT_SIZE_PX,
                 lineHeight: BASE_LINE_HEIGHT,
               }}
             >
@@ -191,34 +189,47 @@ export default function ReceiptCard({
                 <Row label="End" value={data.end} />
                 <Row label="Duration" value={`${pricing.hours}h`} />
                 <Row label="People" value={String(data.peopleCount ?? 1)} />
+                {line}
 
+                {/* Type de package */}
+                <Row label="Package" value={cap(pricing.package.replace('_', ' '))} />
+                <Row label="Included edits" value={`${pricing.includedEdits}`} />
+                {data?.extraEdits && <Row label="Extra edits" value={`${data.extraEdits}`} />}
                 {line}
 
                 <Text size="sm" fw={900} tt="uppercase" mt={4}>
-                  Equipment
+                  Equipment(s)
                 </Text>
 
                 {!anyEquip ? (
-                  <Text size="xs" c="dimmed">(none selected)</Text>
+                  <Text size="xs" c="dimmed">
+                    (none selected)
+                  </Text>
                 ) : (
                   <Stack gap={6}>
                     {hasCCD && (
                       <Stack gap={2}>
-                        <Text size="xs" c="dimmed">CCD Cameras</Text>
+                        <Text size="xs" c="dimmed">
+                          CCD Cameras{includesCcdPhone ? ' (included)' : ''}
+                        </Text>
                         {data.equipCanonIxus980is && <EquipLine label="Canon ixus980is (CCD)" />}
                         {data.equipHpCcd && <EquipLine label="HP (CCD)" />}
                       </Stack>
                     )}
                     {hasPhones && (
                       <Stack gap={2}>
-                        <Text size="xs" c="dimmed">Phones</Text>
+                        <Text size="xs" c="dimmed">
+                          Phones{includesCcdPhone ? ' (included)' : ''}
+                        </Text>
                         {data.equipIphoneX && <EquipLine label="iPhone X" />}
                         {data.equipIphone13 && <EquipLine label="iPhone 13" />}
                       </Stack>
                     )}
                     {hasDSLR && (
                       <Stack gap={2}>
-                        <Text size="xs" c="dimmed">DSLR</Text>
+                        <Text size="xs" c="dimmed">
+                          DSLR
+                        </Text>
                         {data.equipNikonDslr && <EquipLine label="Nikon (DSLR)" />}
                       </Stack>
                     )}
@@ -230,21 +241,55 @@ export default function ReceiptCard({
                 <Text size="sm" fw={900} tt="uppercase" mt={4}>
                   Pricing (estimated)
                 </Text>
-                <Row label="Package" value={cap(pricing.package.replace('_', ' '))} />
-                {pricing.appliedDeal && (
-                  <Text size="xs" c="dimmed">
-                    Deal applied: {pricing.appliedDeal === 'dslr_2h' ? '2h ➜ $80' : '3h ➜ $120'}
-                  </Text>
+
+                {/* Heures (utiliser pricing.hours pour refléter min QC) */}
+                <RowCurrency label={`${pricing.hours} hours`} amount={pricing.base} />
+
+                {/* Surcharge personnes */}
+                {pricing.peopleSurcharge > 0 && (
+                  <RowCurrency
+                    label={
+                      extraPersons > 0
+                        ? `Extra ppl. (${extraPersons}×$${pricing.peopleSurchargeHourly}/h)`
+                        : 'Extra ppl.'
+                    }
+                    amount={pricing.peopleSurcharge}
+                  />
                 )}
-                <RowCurrency label={`${data.durationHours} hours`} amount={pricing.base} />
-                {pricing.coupleFee > 0 && (
-                  <RowCurrency label="Couple fee" amount={pricing.coupleFee} />
+
+                {/* Frais Québec City */}
+                {pricing.cityFee > 0 && (
+                  <RowCurrency label="Quebec City fee" amount={pricing.cityFee} />
                 )}
+
+                {/* Transportation fee */}
+                {pricing.transportationFee > 0 && (
+                  <RowCurrency label="Transportation fee" amount={pricing.transportationFee} />
+                )}
+
+                {/* Add-on DSLR (si applicable) */}
                 {pricing.addonPhotos > 0 && (
                   <RowCurrency
-                    label={`DSLR add-on (${pricing.addonPhotos} photo${pricing.addonPhotos > 1 ? 's' : ''})`}
+                    label={`DSLR add-on (${pricing.addonPhotos} photo${
+                      pricing.addonPhotos > 1 ? 's' : ''
+                    })`}
                     amount={pricing.addonCost}
                   />
+                )}
+
+                {/* Edits inclus + extras */}
+                {pricing.extraEditsCost > 0 && (
+                  <RowCurrency
+                    label={`Extra edits (${pricing.extraEdits} × $${RATES.EDIT_EXTRA_PRICE})`}
+                    amount={pricing.extraEditsCost}
+                  />
+                )}
+
+                {/* Note si une durée minimale a été imposée (ex.: QC + DSLR min 4h) */}
+                {durationMinEnforced && (
+                  <Text size="xs" c="dimmed">
+                    • Minimum duration enforced by location/package rules
+                  </Text>
                 )}
 
                 {line}
@@ -284,8 +329,10 @@ export default function ReceiptCard({
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <Group justify="space-between" gap={6}>
-      <Text size="sm">{label}</Text>
-      <Text size="sm" style={{ fontVariantNumeric: 'tabular-nums' }}>{value}</Text>
+      <Text size="xs">{label}</Text>
+      <Text size="xs" style={{ fontVariantNumeric: 'tabular-nums' }}>
+        {value}
+      </Text>
     </Group>
   );
 }
@@ -294,15 +341,24 @@ function RowCurrency({
   label,
   amount,
   strong,
+  dimmed,
 }: {
   label: string;
   amount: number;
   strong?: boolean;
+  dimmed?: boolean;
 }) {
   return (
     <Group justify="space-between" gap={6}>
-      <Text size="sm">{label}</Text>
-      <Text size="sm" fw={strong ? 800 : 500} style={{ fontVariantNumeric: 'tabular-nums' }}>
+      <Text size={'xs'} c={dimmed ? 'dimmed' : undefined}>
+        {label}
+      </Text>
+      <Text
+        size={'xs'}
+        c={dimmed ? 'dimmed' : undefined}
+        fw={strong ? 800 : 500}
+        style={{ fontVariantNumeric: 'tabular-nums' }}
+      >
         {formatUsd(amount)}
       </Text>
     </Group>
@@ -310,7 +366,11 @@ function RowCurrency({
 }
 
 function EquipLine({ label }: { label: string }) {
-  return <Text size="sm" style={{ lineHeight: BASE_LINE_HEIGHT }}>• {label}</Text>;
+  return (
+    <Text size="xs" style={{ lineHeight: BASE_LINE_HEIGHT }}>
+      • {label}
+    </Text>
+  );
 }
 
 /* ---------- utils ---------- */

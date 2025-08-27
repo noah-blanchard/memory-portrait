@@ -7,10 +7,10 @@ export default function Page() {
   return (
     <Container size="lg" py="xl" style={{ position: 'relative' }}>
       <Group style={{ position: 'absolute', bottom: 16, right: 10, zIndex: 1 }}>
-        <Anchor component={Link} href="/admin-login" size="xs" fw={500}>
+        {/* <Anchor component={Link} href="/admin-login" size="xs" fw={500}>
           <IconLockPassword size={16} style={{ marginRight: 4 }} />
           Admin Login
-        </Anchor>
+        </Anchor> */}
       </Group>
       <HeroClient />
     </Container>

@@ -1,9 +1,8 @@
 'use client';
 
-import { IconBrandInstagram, IconBrandWechat, IconCamera } from '@tabler/icons-react';
-import { ActionIcon, Card, Container, Group, Stack } from '@mantine/core';
+import { IconAt, IconBrandInstagram, IconBrandWechat, IconCamera } from '@tabler/icons-react';
+import { ActionIcon, Card, Container, CopyButton, Group, Stack } from '@mantine/core';
 import { Anchor, Badge, Button, Text, Title } from '@/components/I18nUI/I18nUI';
-import LandingIllustration from '@/components/svgs-illustrations/LandingIllustration';
 
 export default function HeroClient() {
   return (
@@ -33,21 +32,10 @@ export default function HeroClient() {
           ta="center"
           maw={720}
         >
-          welcome_tagline
+          Believe me, your beauty has no limits
         </Text>
 
-        <Group mt="lg" gap="md" justify="center" wrap="wrap">
-          {/* <Button
-              component={Link}
-              href="/request"
-              size="md"
-              radius="lg"
-              color="babyBlue"
-              style={{ fontWeight: 700 }}
-            >
-              {t("cta_request")}
-            </Button> */}
-
+        <Group mt="lg" gap="md" justify="center" wrap="wrap" w="100%">
           <Anchor
             href="/booking"
             size="md"
@@ -61,8 +49,10 @@ export default function HeroClient() {
               border: '1px dashed var(--mantine-color-babyBlue-3)',
               borderRadius: 12,
               textDecoration: 'none',
+              width: '100%',
               textUnderlineOffset: 4,
               transition: 'background 0.2s, border-color 0.2s',
+              flex: 1,
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLElement).style.backgroundColor =
@@ -83,27 +73,46 @@ export default function HeroClient() {
 
         {/* Flèche animée vers le CTA principal */}
       </Stack>
-      <Group justify="center" mt="xl" gap="sm">
-        <ActionIcon
-          aria-label="Instagram"
-          size="lg"
-          radius="xl"
-          variant="gradient"
-          gradient={{ from: 'pink.5', to: 'orange.5', deg: 45 }}
-        >
-          <IconBrandInstagram size={18} />
-        </ActionIcon>
+      <Stack justify="center" align="center" mt="xl" gap="sm">
+        <Badge fw={700} size="lg" mb="xs" fullWidth>
+          Socials
+        </Badge>
+        <CopyButton value="memory_portrait" timeout={2000}>
+          {({ copied, copy }) => (
+            <Button
+              aria-label="Instagram"
+              size="lg"
+              radius="xl"
+              fullWidth
+              variant="gradient"
+              gradient={{ from: 'pink.5', to: 'orange.5', deg: 45 }}
+              leftSection={<IconBrandInstagram size={24} />}
+              onClick={copy}
+              color={copied ? 'green' : undefined}
+            >
+              {copied ? 'Copied!' : 'memory_portrait'}
+            </Button>
+          )}
+        </CopyButton>
 
-        <ActionIcon
-          aria-label="WeChat"
-          size="lg"
-          radius="xl"
-          variant="filled"
-          bg="wechatGreen.5" // vert WeChat
-        >
-          <IconBrandWechat size={18} />
-        </ActionIcon>
-      </Group>
+        <CopyButton value="memory" timeout={2000}>
+          {({ copied, copy }) => (
+            <Button
+              fullWidth
+              aria-label="WeChat"
+              size="lg"
+              radius="xl"
+              variant="filled"
+              bg="wechatGreen.5"
+              leftSection={<IconBrandWechat size={24} />}
+              onClick={copy}
+              color={copied ? 'green' : undefined}
+            >
+              {copied ? 'Copied!' : 'memory'}
+            </Button>
+          )}
+        </CopyButton>
+      </Stack>
     </Container>
   );
 }
