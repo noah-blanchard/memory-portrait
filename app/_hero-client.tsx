@@ -95,7 +95,7 @@ export default function HeroClient() {
           )}
         </CopyButton>
 
-        <CopyButton value="Missnuu" timeout={2000}>
+        <CopyButton value="Missnnuu" timeout={2000}>
           {({ copied, copy }) => (
             <Button
               fullWidth
@@ -108,7 +108,7 @@ export default function HeroClient() {
               onClick={copy}
               color={copied ? 'green' : undefined}
             >
-              {copied ? 'Copied!' : 'Missnuu'}
+              {copied ? 'Copied!' : 'Missnnuu'}
             </Button>
           )}
         </CopyButton>
