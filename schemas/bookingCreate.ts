@@ -85,8 +85,9 @@ export const bookingCreateSchema = z
     switch (val.contactMethod) {
       case 'email': {
         const r = z.email().safeParse(c);
-        if (!r.success)
+        if (!r.success) {
           ctx.addIssue({ code: 'custom', path: ['contact'], message: 'Invalid email' });
+        }
         break;
       }
       case 'wechat': {
@@ -156,21 +157,22 @@ export const bookingCreateSchema = z
           message: 'Please set DSLR add-on photos (min 3) when mixing DSLR with CCD/Phone',
         });
       }
-    } else {
-      if (val.dslrAddonPhotos != null) {
-        ctx.addIssue({
-          code: 'custom',
-          path: ['dslrAddonPhotos'],
-          message: 'DSLR add-on is only allowed when DSLR is combined with CCD/Phone',
-        });
-      }
+    } else if (val.dslrAddonPhotos != null) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['dslrAddonPhotos'],
+        message: 'DSLR add-on is only allowed when DSLR is combined with CCD/Phone',
+      });
     }
   })
   .transform((v) => {
     let contact = v.contact;
-    if (v.contactMethod === 'instagram' || v.contactMethod === 'wechat')
+    if (v.contactMethod === 'instagram' || v.contactMethod === 'wechat') {
       contact = contact.toLowerCase();
-    if (v.contactMethod === 'phone') contact = stripPhone(contact);
+    }
+    if (v.contactMethod === 'phone') {
+      contact = stripPhone(contact);
+    }
     return { ...v, contact };
   });
 
