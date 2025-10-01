@@ -17,21 +17,13 @@ import { useForm } from '@mantine/form';
 import ReceiptCard, { ReceiptData } from '@/components/receipt/ReceiptCard';
 import { mantineZodResolver } from '@/lib/mantineZodResolver';
 import { bookingCreateSchema } from '@/schemas/bookingCreate';
-import { step1Schema, step2Schema, step3Schema, step4Schema } from '@/schemas/bookingSteps';
-// <-- tes schémas individuels
+import { contactStepSchema, detailsStepSchema, scheduleStepSchema, equipmentStepSchema } from '@/schemas/bookingSteps';
 
-import { ContactMethods, PhotoshootTypes } from '@/schemas/enums';
 import Step1Contact from './Step1Contact';
 import Step2Details from './Step2Details';
-import Step3Equipment from './Step3Equipment';
-import Step4Schedule from './Step4Schedule';
-
-// ------------- helpers -------------
-const contactMethodOptions = ContactMethods.map((m) => ({ value: m, label: cap(m) }));
-const photoshootOptions = PhotoshootTypes.map((t) => ({ value: t, label: cap(t) }));
-function cap(s: string) {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
+import Step3Schedule from './Step3Schedule';
+import Step4Equipment from './Step4Equipment';
+import Step5Review from './Step5Review';
 
 function mergeDateTime(d: Date, hhmm: string): Date {
   const [h, m] = hhmm.split(':').map((n) => parseInt(n, 10));
@@ -40,30 +32,23 @@ function mergeDateTime(d: Date, hhmm: string): Date {
   return out;
 }
 
-// ------------- composant -------------
 export default function BookingStepperForm() {
   const [active, setActive] = useState(0);
-  const [serverError, setServerError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [_serverError, setServerError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [receipt, setReceipt] = useState<ReceiptData | null>(null);
 
-  // valeurs de toutes les étapes dans un seul form (1 colonne)
   const form = useForm({
     initialValues: {
-      // step 1
       clientName: '',
       contactMethod: 'wechat',
       contact: '',
-      // step 2
       photoshootKind: 'portrait',
       location: 'Montreal',
       peopleCount: 1,
-      // step 3
       date: null as Date | null,
       time: '',
       durationHours: 1,
-      // step 4 (equipment)
       equipCanonIxus980is: false,
       equipHpCcd: false,
       equipIphoneX: false,
@@ -71,18 +56,16 @@ export default function BookingStepperForm() {
       equipNikonDslr: false,
       dslrAddonPhotos: 0,
       extraEdits: 0,
-
-      // options (UI)
-      __contactMethodOptions: contactMethodOptions,
-      __photoshootOptions: photoshootOptions,
     },
   });
 
   const schemaByIndex: Record<number, z.ZodTypeAny> = {
-    0: step1Schema,
-    1: step2Schema,
-    2: step3Schema,
-    3: step4Schema,
+    0: contactStepSchema,   // Step 1: Contact (name + contact)
+    1: detailsStepSchema,   // Step 2: Details (photoshoot type + location)
+    2: scheduleStepSchema,  // Step 3: Schedule (date + time + duration)
+    3: equipmentStepSchema, // Step 4: Equipment (equipment selection)
+    4: z.object({}),       // Step 5: Review - no validation needed
+    5: z.object({}),       // Step 6: Receipt - no validation needed
   };
 
   const validateStep = (i: number) => {
@@ -92,12 +75,16 @@ export default function BookingStepperForm() {
   };
 
   const next = () => {
-    if (validateStep(active)) setActive((s) => Math.min(s + 1, 4));
+    if (validateStep(active)) {
+      setActive((s) => Math.min(s + 1, 6));
+    }
   };
   const back = () => setActive((s) => Math.max(s - 1, 0));
 
   const handleSubmit = async () => {
-    if (!validateStep(3)) return; // valide Step 4 (equipment)
+    if (!validateStep(3)) {
+      return;
+    }
 
     const start = mergeDateTime(form.values.date as Date, form.values.time);
     const end = dayjs(start).add(form.values.durationHours, 'hour').toDate();
@@ -114,7 +101,6 @@ export default function BookingStepperForm() {
       language: undefined,
       notes: undefined,
 
-      // équipements
       equipCanonIxus980is: !!form.values.equipCanonIxus980is,
       equipHpCcd: !!form.values.equipHpCcd,
       equipIphoneX: !!form.values.equipIphoneX,
@@ -123,9 +109,8 @@ export default function BookingStepperForm() {
 
       extraEdits: form.values.extraEdits === 0 || form.values.extraEdits == null
         ? null
-        : Number(form.values.extraEdits), 
+        : Number(form.values.extraEdits),
 
-      // add-on DSLR (nombre) – laisse null si non saisi
       dslrAddonPhotos:
         form.values.dslrAddonPhotos === 0 || form.values.dslrAddonPhotos == null
           ? null
@@ -136,7 +121,9 @@ export default function BookingStepperForm() {
 
     if (!final.success) {
       const errs: Record<string, string> = {};
-      for (const i of final.error.issues) errs[i.path.join('.')] = i.message;
+      for (const i of final.error.issues) {
+        errs[i.path.join('.')] = i.message;
+      }
       form.setErrors(errs);
       return;
     }
@@ -170,19 +157,17 @@ export default function BookingStepperForm() {
         durationHours: form.values.durationHours,
         location: final.data.location ?? 'Montreal',
 
-        // ⬇️ pour pricing/affichage
         peopleCount: final.data.peopleCount ?? 1,
         dslrAddonPhotos: final.data.dslrAddonPhotos ?? null,
         extraEdits: final.data.extraEdits ?? null,
 
-        // équipements
         equipCanonIxus980is: !!final.data.equipCanonIxus980is,
         equipHpCcd: !!final.data.equipHpCcd,
         equipIphoneX: !!final.data.equipIphoneX,
         equipIphone13: !!final.data.equipIphone13,
         equipNikonDslr: !!final.data.equipNikonDslr,
       } as ReceiptData);
-      setActive(4);
+      setActive(5);
       form.reset();
     } catch (e: any) {
       setServerError(e?.message ?? 'Network error');
@@ -199,8 +184,6 @@ export default function BookingStepperForm() {
 
   return (
     <Stack gap="lg">
-      {/* ... alerts */}
-
       <Stepper active={active} onStepClick={setActive} allowNextStepsSelect={false}>
         <Stepper.Step icon={<IconUser size={18} />} completedIcon={<IconMoodSmile size={18} />}>
           <Step1Contact form={form} onNext={next} />
@@ -214,11 +197,15 @@ export default function BookingStepperForm() {
         </Stepper.Step>
 
         <Stepper.Step icon={<IconCalendar size={18} />} completedIcon={<IconMoodCheck size={18} />}>
-          <Step4Schedule loading={loading} form={form} onBack={back} onSubmit={next} />
+          <Step3Schedule loading={loading} form={form} onBack={back} onNext={next} />
         </Stepper.Step>
 
         <Stepper.Step icon={<IconTool size={18} />} completedIcon={<IconTool size={18} />}>
-          <Step3Equipment loading={loading} form={form} onBack={back} onNext={handleSubmit} />
+          <Step4Equipment loading={loading} form={form} onBack={back} onNext={next} />
+        </Stepper.Step>
+
+        <Stepper.Step icon={<IconCalendar size={18} />} completedIcon={<IconMoodCheck size={18} />}>
+          <Step5Review loading={loading} form={form} onBack={back} onNext={handleSubmit} />
         </Stepper.Step>
 
         <Stepper.Completed>

@@ -2,17 +2,15 @@
 
 import { IconClover, IconSailboat } from '@tabler/icons-react';
 import {
-  Button,
   Group,
-  InputLabel,
   NativeSelect,
-  NumberInput,
   SegmentedControl,
-  Select,
   Stack,
 } from '@mantine/core';
+import { Button, InputLabel } from '@/components/I18nUI/I18nUI';
 import type { UseFormReturnType } from '@mantine/form';
 import ButtonNumberInput from '@/components/number/NumberInput';
+import { useTranslation } from 'react-i18next';
 
 export default function Step2Details({
   form,
@@ -23,17 +21,27 @@ export default function Step2Details({
   onBack: () => void;
   onNext: () => void;
 }) {
+  const { t } = useTranslation('common');
+  
+  const photoshootOptions = [
+    { value: 'portrait', label: t('photoshoot_portrait') },
+    { value: 'tourism', label: t('photoshoot_tourism') },
+    { value: 'family', label: t('photoshoot_family') },
+    { value: 'linkedin', label: t('photoshoot_linkedin') },
+    { value: 'event', label: t('photoshoot_event') },
+  ];
+  
   return (
     <Stack gap="md">
       <NativeSelect
-        label="Photoshoot type"
-        data={form.values.__photoshootOptions ?? []}
+        label={t('step2_photoshoot_type')}
+        data={photoshootOptions}
         withAsterisk
         {...form.getInputProps('photoshootKind')}
       />
 
       <InputLabel size="lg" fw={600} required>
-        Location
+        {t('step2_location')}
       </InputLabel>
       <SegmentedControl
         defaultValue="Montreal"
@@ -42,7 +50,7 @@ export default function Step2Details({
             label: (
               <>
                 <IconClover size={20} style={{ marginRight: 6 }} />
-                Montreal
+                {t('step2_montreal')}
               </>
             ),
             value: 'Montreal',
@@ -51,7 +59,7 @@ export default function Step2Details({
             label: (
               <>
                 <IconSailboat size={20} style={{ marginRight: 6 }} />
-                Quebec City
+                {t('step2_quebec_city')}
               </>
             ),
             value: 'Quebec City',
@@ -69,14 +77,13 @@ export default function Step2Details({
         }}
       />
 
-      {/* <NumberInput label="Number of people" min={1} {...form.getInputProps('peopleCount')} /> */}
-      <ButtonNumberInput label="Number of people" {...form.getInputProps('peopleCount')} />
+      <ButtonNumberInput label={t('step2_people_count')} {...form.getInputProps('peopleCount')} />
 
       <Group justify="space-between" mt="md">
         <Button variant="default" onClick={onBack}>
-          Back
+          common_back
         </Button>
-        <Button onClick={onNext}>Next step</Button>
+        <Button onClick={onNext}>common_next</Button>
       </Group>
     </Stack>
   );

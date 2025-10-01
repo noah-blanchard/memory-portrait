@@ -6,7 +6,6 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function PATCH(req: Request) {
-  // ---- Auth check
   const supabase = await createServerClient();
   const {
     data: { user },
@@ -20,7 +19,6 @@ export async function PATCH(req: Request) {
     );
   }
 
-  // ---- Parse & validate body
   let body: unknown;
   try {
     body = await req.json();
@@ -48,7 +46,6 @@ export async function PATCH(req: Request) {
 
   const { requestUid, status } = parsed.data;
 
-  // ---- RPC
   const { data, error } = await supabase.rpc('set_booking_status', {
     p_request_uid: requestUid,
     p_status: status,
@@ -74,7 +71,6 @@ export async function PATCH(req: Request) {
     );
   }
 
-  // Renvoie la ligne mise à jour (tu peux réduire si tu veux)
   return NextResponse.json(
     {
       ok: true,

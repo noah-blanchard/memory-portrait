@@ -3,11 +3,8 @@ import { bookingCreateSchema, type BookingCreateInput } from './bookingCreate';
 import { ContactMethodEnum, PhotoshootTypeEnum } from './enums';
 
 
-/* --- mêmes petits helpers que dans bookingCreate --- */
 const normalizeWhitespace = (s: string) => s.replace(/\s+/g, ' ').trim();
 const stripPhone = (s: string) => s.replace(/[^\d+]/g, '');
-
-/* --- validation contact (réutilisable) --- */
 function validateContactForMethod(
   method: BookingCreateInput['contactMethod'],
   contact: string,
@@ -58,10 +55,7 @@ function validateContactForMethod(
   }
 }
 
-/* ===================== STEP SCHEMAS ===================== */
-
-/** Step 1: name + contact method + contact (1 champ par ligne) */
-export const step1Schema = z
+export const contactStepSchema = z
   .object({
     clientName: z.string().min(1).max(120).transform(normalizeWhitespace),
     contactMethod: ContactMethodEnum,
@@ -71,8 +65,7 @@ export const step1Schema = z
     validateContactForMethod(val.contactMethod, val.contact, ctx);
   });
 
-/** Step 2: photoshoot type + location (ville au Québec) */
-export const step2Schema = z.object({
+export const detailsStepSchema = z.object({
   photoshootKind: PhotoshootTypeEnum,
   location: z
     .string()
@@ -81,15 +74,14 @@ export const step2Schema = z.object({
     .transform(normalizeWhitespace),
 });
 
-/** Step 3: date + time (HH:mm) + duration (1..3h) */
-export const step3Schema = z.object({
+export const scheduleStepSchema = z.object({
   date: z.coerce.date(),
   time: z.string().regex(/^\d{2}:\d{2}$/, 'Pick a time (HH:mm)'),
   durationHours: z.number().int().min(1),
   extraEdits: z.number().min(0).optional(),
 });
 
-export const step4Schema = z
+export const equipmentStepSchema = z
   .object({
     equipCanonIxus980is: z.boolean(),
     equipHpCcd: z.boolean(),
@@ -97,20 +89,24 @@ export const step4Schema = z
     equipIphone13: z.boolean(),
     equipNikonDslr: z.boolean(),
 
-    // Durée (pour gérer la règle "DSLR ≥ 2h => CCD/Phone inclus")
     durationHours: z.preprocess(
       (v) => {
-        if (v === '' || v === null || typeof v === 'undefined') return undefined;
+        if (v === '' || v === null || typeof v === 'undefined') {
+          return undefined;
+        }
         const n = typeof v === 'string' ? Number(v) : v;
         return Number.isFinite(n) ? n : undefined;
       },
       z.number("Enter duration").int().min(1, 'Minimum 1 hour')
     ),
 
-    // Add-on DSLR : optionnel, min 3 si présent
     dslrAddonPhotos: z.preprocess((v) => {
-      if (v === '' || v === null || typeof v === 'undefined') return undefined;
-      if (typeof v === 'string' && v.trim() === '') return undefined;
+      if (v === '' || v === null || typeof v === 'undefined') {
+        return undefined;
+      }
+      if (typeof v === 'string' && v.trim() === '') {
+        return undefined;
+      }
       const n = typeof v === 'string' ? Number(v) : v;
       return Number.isFinite(n) ? n : v;
     }, z.number('Enter a number').int().min(3).optional()),
@@ -123,7 +119,6 @@ export const step4Schema = z
 
     const includesCcdPhone = !!hasDslr && Number(v.durationHours) >= 2;
 
-    // 1) Au moins un équipement
     if (!hasDslr && !hasCcdOrPhone) {
       ctx.addIssue({
         code: 'custom',
@@ -132,7 +127,6 @@ export const step4Schema = z
       });
     }
 
-    // 2) Add-on interdit si pas de DSLR
     if (!hasDslr && typeof v.dslrAddonPhotos !== 'undefined') {
       ctx.addIssue({
         code: 'custom',
@@ -141,7 +135,6 @@ export const step4Schema = z
       });
     }
 
-    // 3) Add-on interdit si DSLR seul (pas de CCD/Phone)
     if (hasDslr && !hasCcdOrPhone && typeof v.dslrAddonPhotos !== 'undefined') {
       ctx.addIssue({
         code: 'custom',
@@ -150,7 +143,6 @@ export const step4Schema = z
       });
     }
 
-    // 4) Add-on interdit quand Nikon + durée ≥ 2h (CCD/Phone inclus gratuitement)
     if (includesCcdPhone && typeof v.dslrAddonPhotos !== 'undefined') {
       ctx.addIssue({
         code: 'custom',
@@ -159,16 +151,13 @@ export const step4Schema = z
       });
     }
 
-    // ✅ Plus d’obligation d’add-on quand DSLR est combiné avec CCD/Phone
-    // (si hasDslr && hasCcdOrPhone && durée < 2h ⇒ add-on facultatif)
   });
 
-export type Step1 = z.infer<typeof step1Schema>;
-export type Step2 = z.infer<typeof step2Schema>;
-export type Step3 = z.infer<typeof step3Schema>;
-export type Step4 = z.infer<typeof step4Schema>;
+export type ContactStep = z.infer<typeof contactStepSchema>;
+export type DetailsStep = z.infer<typeof detailsStepSchema>;
+export type ScheduleStep = z.infer<typeof scheduleStepSchema>;
+export type EquipmentStep = z.infer<typeof equipmentStepSchema>;
 
-/* ===================== COMPOSITION FINALE ===================== */
 
 function mergeDateTime(d: Date, hhmm: string): Date {
   const [h, m] = hhmm.split(':').map((n) => parseInt(n, 10));
@@ -177,38 +166,33 @@ function mergeDateTime(d: Date, hhmm: string): Date {
   return out;
 }
 
-/** Construit l'objet final attendu par bookingCreateSchema, puis safeParse */
-export function buildAndValidateBooking(s1: Step1, s2: Step2, s3: Step3, s4: Step4) {
-  const start = mergeDateTime(s3.date, s3.time);
-  const end = new Date(start.getTime() + s3.durationHours * 60 * 60 * 1000);
+export function buildAndValidateBooking(contact: ContactStep, details: DetailsStep, schedule: ScheduleStep, equipment: EquipmentStep) {
+  const start = mergeDateTime(schedule.date, schedule.time);
+  const end = new Date(start.getTime() + schedule.durationHours * 60 * 60 * 1000);
 
-  // ⚠️ Ne pas typer directement en BookingCreateInput (c’est le type APRES transform)
   const candidate: BookingCreateInput = {
-    clientName: s1.clientName,
-    contactMethod: s1.contactMethod,
-    contact: s1.contact,
-    photoshootKind: s2.photoshootKind,
+    clientName: contact.clientName,
+    contactMethod: contact.contactMethod,
+    contact: contact.contact,
+    photoshootKind: details.photoshootKind,
     start,
     end,
-    location: s2.location || 'Montreal', // laisse le schéma gérer
+    location: details.location || 'Montreal', // laisse le schéma gérer
     peopleCount: 1, // ok: le schéma a un default(1) aussi
     language: 'undefined',
     notes: 'undefined',
 
-    // équipements (booléens) – valeurs par défaut false si non fournis
-    equipCanonIxus980is: !!s4?.equipCanonIxus980is,
-    equipHpCcd: !!s4?.equipHpCcd,
-    equipIphoneX: !!s4?.equipIphoneX,
-    equipIphone13: !!s4?.equipIphone13,
-    equipNikonDslr: !!s4?.equipNikonDslr,
-    extraEdits: s3?.extraEdits ?? 0,
+    equipCanonIxus980is: !!equipment?.equipCanonIxus980is,
+    equipHpCcd: !!equipment?.equipHpCcd,
+    equipIphoneX: !!equipment?.equipIphoneX,
+    equipIphone13: !!equipment?.equipIphone13,
+    equipNikonDslr: !!equipment?.equipNikonDslr,
+    extraEdits: schedule?.extraEdits ?? 0,
   };
 
-  // Validation + transforms (normalisation contact, checks cross-field, etc.)
   return bookingCreateSchema.safeParse(candidate);
 }
 
-/** (optionnel) aide pour router les erreurs du schéma final vers les steps */
 export function splitFinalIssuesByStep(issues: z.ZodIssue[]) {
   const s1: Record<string, string> = {};
   const s2: Record<string, string> = {};
@@ -217,9 +201,13 @@ export function splitFinalIssuesByStep(issues: z.ZodIssue[]) {
   for (const i of issues) {
     const key = i.path.join('.');
     const msg = i.message;
-    if (key.startsWith('clientName') || key.startsWith('contact')) s1[key] = msg;
-    else if (key.startsWith('photoshootKind') || key.startsWith('location')) s2[key] = msg;
-    else if (key === 'start' || key === 'end') s3.time = msg; // mappe sur time/duration
+    if (key.startsWith('clientName') || key.startsWith('contact')) {
+      s1[key] = msg;
+    } else if (key.startsWith('photoshootKind') || key.startsWith('location')) {
+      s2[key] = msg;
+    } else if (key === 'start' || key === 'end') {
+      s3.time = msg;
+    }
   }
   return { s1, s2, s3 };
 }

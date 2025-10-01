@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge } from '@mantine/core';
+import { Badge } from '@/components/I18nUI/I18nUI';
 import { STATUS_META, type BookingStatus } from '../statusTheme';
 
 export default function StatusBadge({ status }: { status: BookingStatus }) {

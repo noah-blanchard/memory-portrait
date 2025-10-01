@@ -31,8 +31,11 @@ function issuesToMantineErrors(
     const key = joinPath(issue.path);
     const msg = issue.message || "Invalid value";
 
-    if (!(key in out)) out[key] = msg;
-    else if (duplicateStrategy === "all") out[key] = `${out[key]}${multiMessageJoiner}${msg}`;
+    if (!(key in out)) {
+      out[key] = msg;
+    } else if (duplicateStrategy === "all") {
+      out[key] = `${out[key]}${multiMessageJoiner}${msg}`;
+    }
   }
   return out;
 }
@@ -43,7 +46,9 @@ export function mantineZodResolver<S extends z.ZodTypeAny>(
 ) {
   return (values: unknown): MantineErrors => {
     const parsed = schema.safeParse(values);
-    if (parsed.success) return {};
+    if (parsed.success) {
+      return {};
+    }
     return issuesToMantineErrors(parsed.error.issues as ReadonlyArray<ZodIssue>, opts);
   };
 }
@@ -54,7 +59,9 @@ export function mantineZodResolverAsync<S extends z.ZodTypeAny>(
 ) {
   return async (values: unknown): Promise<MantineErrors> => {
     const parsed = await schema.safeParseAsync(values);
-    if (parsed.success) return {};
+    if (parsed.success) {
+      return {};
+    }
     return issuesToMantineErrors(parsed.error.issues as ReadonlyArray<ZodIssue>, opts);
   };
 }

@@ -3,32 +3,30 @@ export type EquipmentSelection = {
   equipHpCcd?: boolean;
   equipIphoneX?: boolean;
   equipIphone13?: boolean;
-  equipNikonDslr?: boolean; // Big camera (DSLR)
+  equipNikonDslr?: boolean;
 };
 
 export type PriceBreakdown = {
   package: 'CCD/Phone' | 'DSLR' | 'None';
-  hours: number; // arrondi à l'heure sup (>=1 ; QC+DSLR => >=4)
-  baseHourly: number; // 35 | 40 | 50 selon règles
-  base: number; // baseHourly * hours
+  hours: number;
+  baseHourly: number;
+  base: number;
 
-  // ➜ Ancienne compat
-  coupleFee: number; // == peopleSurcharge (compat ancienne UI)
-  addonPhotos: number; // add-on DSLR photos (seulement si package CCD/Phone)
-  addonCost: number; // addonPhotos * 3
-  appliedDeal: null; // (plus de deals 2h/3h) => null
+  coupleFee: number;
+  addonPhotos: number;
+  addonCost: number;
+  appliedDeal: null;
 
-  // ➜ Nouvelles infos
-  peopleSurchargeHourly: number; // 10 (CCD/Phone) | 15 (DSLR)
-  peopleSurcharge: number; // (people - 1) * peopleSurchargeHourly * hours
-  cityFee: number; // 100 si Quebec City, sinon 0
-  transportationFee: number; // param (variable, ex ~100)
-  includedEdits: number; // edits inclus (4 de base ; DSLR ≥3h => +2/h >2h)
-  extraEdits: number; // edits payants demandés
-  extraEditsCost: number; // extraEdits * 3
-  perks: string[]; // ex: "CCD/Phone inclus (≥ 2h DSLR)"
+  peopleSurchargeHourly: number;
+  peopleSurcharge: number;
+  cityFee: number;
+  transportationFee: number;
+  includedEdits: number;
+  extraEdits: number;
+  extraEditsCost: number;
+  perks: string[];
 
-  total: number; // somme finale arrondie à 2 déc.
+  total: number;
   warnings: string[];
   errors: string[];
 };
@@ -46,7 +44,7 @@ export const RATES = {
 } as const;
 
 function ceilHours(h: number): number {
-  if (!Number.isFinite(h) || h <= 0) return 1;
+  if (!Number.isFinite(h) || h <= 0) {return 1;}
   return Math.ceil(h);
 }
 function round2(n: number): number {
@@ -54,13 +52,13 @@ function round2(n: number): number {
 }
 
 export function estimatePrice(params: {
-  people?: number; // défaut 1
-  equipment: EquipmentSelection; // choix d’équipement
-  durationHours: number; // arrondi à l’heure sup
-  addonPhotos?: number | null; // (hérité) nb photos add-on DSLR si package CCD/Phone
-  location?: 'Montreal' | 'Quebec City'; // (note: garde l'espace double si c'est ce que tu utilises)
-  transportationFee?: number; // défaut 0 (ex: ~100 à QC)
-  extraEdits?: number; // nb d’edits payants supplémentaires
+  people?: number;
+  equipment: EquipmentSelection;
+  durationHours: number;
+  addonPhotos?: number | null;
+  location?: 'Montreal' | 'Quebec City';
+  transportationFee?: number;
+  extraEdits?: number;
 }): PriceBreakdown {
   const people = Math.max(1, Math.floor(params.people ?? 1));
   const location = params.location ?? 'Montreal';
@@ -82,13 +80,8 @@ export function estimatePrice(params: {
   const errors: string[] = [];
   const perks: string[] = [];
 
-  // ---- 1) Heures (arrondi) ----
   let hours = ceilHours(params.durationHours);
 
-  // ---- 2) Choix du package (corrigé) ----
-  // Règle: si DSLR sélectionné et heures ≥ 2 => package DSLR (CCD/Phone inclus automatiquement)
-  //       si DSLR sélectionné et heures < 2 et CCD/Phone cochés => package CCD/Phone (DSLR = add-on)
-  //       sinon règles classiques
   let chosen: PriceBreakdown['package'] = 'None';
   if (hasDslr) {
     if (hours >= 2) {
@@ -103,12 +96,10 @@ export function estimatePrice(params: {
     errors.push('Select at least one equipment option.');
   }
 
-  // ---- 3) Contrainte Québec City (min 4h si DSLR) ----
   if (location === 'Quebec City' && chosen === 'DSLR') {
     hours = Math.max(4, hours);
   }
 
-  // ---- 4) Tarifs horaires ----
   let baseHourly = 0;
   if (chosen === 'CCD/Phone') {
     baseHourly = RATES.CCD_PHONE_HOURLY; // 35$/h
@@ -116,7 +107,6 @@ export function estimatePrice(params: {
     baseHourly = hours === 1 ? RATES.DSLR_HOURLY_1H : RATES.DSLR_HOURLY_GT1H; // 50$/h puis 40$/h
   }
 
-  // ---- 5) Règles combo & messages ----
   if (chosen === 'DSLR') {
     if (hours === 1 && hasCcdOrPhone) {
       warnings.push('1h DSLR : CCD/Phone non disponible — ignoré.');
@@ -125,10 +115,8 @@ export function estimatePrice(params: {
     }
   }
 
-  // ---- 6) City fee + transport (QC) ----
   const cityFee = location === 'Quebec City' ? RATES.CITY_FEE_QC : 0;
 
-  // ---- 7) Surcharge personnes (par heure) ----
   const extraPersons = Math.max(0, people - 1);
   const peopleSurchargeHourly =
     chosen === 'DSLR'
@@ -138,7 +126,6 @@ export function estimatePrice(params: {
         : 0;
   const peopleSurcharge = extraPersons * peopleSurchargeHourly * hours;
 
-  // ---- 8) Add-on DSLR photos (seulement si package CCD/Phone) ----
   let addonPhotos = 0;
   let addonCost = 0;
   if (chosen === 'CCD/Phone') {
@@ -151,14 +138,12 @@ export function estimatePrice(params: {
     warnings.push('Add-on DSLR photos seulement avec le package CCD/Phone — ignoré.');
   }
 
-  // ---- 9) Édits inclus + extras ----
   let includedEdits = 4; // base pour tous
   if (chosen === 'DSLR' && hours >= 3) {
     includedEdits = 4 + 2 * (hours - 2); // 3h=6, 4h=8, 5h=10...
   }
   const extraEditsCost = extraEdits > 0 ? extraEdits * RATES.EDIT_EXTRA_PRICE : 0;
 
-  // ---- 10) Base & total ----
   const base = baseHourly * hours;
   const total = round2(base + peopleSurcharge + cityFee + transport + addonCost + extraEditsCost);
 
@@ -168,13 +153,11 @@ export function estimatePrice(params: {
     baseHourly,
     base: round2(base),
 
-    // compat
     coupleFee: round2(peopleSurcharge),
     addonPhotos,
     addonCost: round2(addonCost),
     appliedDeal: null,
 
-    // nouveaux champs
     peopleSurchargeHourly,
     peopleSurcharge: round2(peopleSurcharge),
     cityFee: round2(cityFee),

@@ -17,11 +17,11 @@ export type StatusMeta = {
 };
 
 export const STATUS_META: Record<BookingStatus, StatusMeta> = {
-  pending:   { label: 'Pending',   color: 'yellow', Icon: IconHourglassHigh },
-  reviewed:  { label: 'Reviewed',  color: 'blue',   Icon: IconSearch },
-  approved:  { label: 'Approved',  color: 'green',  Icon: IconCircleCheck },
-  rejected:  { label: 'Rejected',  color: 'red',    Icon: IconCircleX },
-  cancelled: { label: 'Cancelled', color: 'gray',   Icon: IconBan },
+  pending:   { label: 'status_pending',   color: 'yellow', Icon: IconHourglassHigh },
+  reviewed:  { label: 'status_reviewed',  color: 'blue',   Icon: IconSearch },
+  approved:  { label: 'status_approved',  color: 'green',  Icon: IconCircleCheck },
+  rejected:  { label: 'status_rejected',  color: 'red',    Icon: IconCircleX },
+  cancelled: { label: 'status_cancelled', color: 'gray',   Icon: IconBan },
 };
 
 export const STATUS_ORDER: BookingStatus[] = [

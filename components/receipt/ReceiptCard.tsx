@@ -5,13 +5,13 @@ import { useEffect, useState } from 'react';
 import { Roboto_Mono } from 'next/font/google';
 import { IconCheck, IconCopy, IconDownload } from '@tabler/icons-react';
 import html2canvas from 'html2canvas';
-import { Box, Button, Collapse, CopyButton, Group, Paper, Stack, Text, Tooltip, Transition } from '@mantine/core';
+import { Box, Collapse, CopyButton, Group, Paper, Stack, Transition } from '@mantine/core';
+import { Button, Text, Tooltip } from '@/components/I18nUI/I18nUI';
 import { estimatePrice, RATES } from '../booking/stepper/helpers';
 
 
 const receiptFont = Roboto_Mono({ subsets: ['latin'], weight: '400' });
 
-// ——— compact sizing
 const BASE_FONT_SIZE_PX = 12;
 const BASE_LINE_HEIGHT = 1.15;
 
@@ -58,9 +58,9 @@ export default function ReceiptCard({
   if (!mounted) {
     return (
       <Stack align="center" gap="xs">
-        <Text c="dimmed">No receipt data</Text>
+        <Text c="dimmed">receipt_no_data</Text>
         <Button variant="light" size="xs" onClick={onNew}>
-          New request
+          receipt_new_request
         </Button>
       </Stack>
     );
@@ -69,9 +69,13 @@ export default function ReceiptCard({
   const line = <Box my={7} style={{ borderTop: '1px dashed var(--mantine-color-gray-4)' }} />;
 
   async function downloadReceipt(id: string | null | undefined) {
-    if (!id) return;
-    const receiptEl = document.querySelector('.' + receiptFont.className);
-    if (!receiptEl) return;
+    if (!id) {
+      return;
+    }
+    const receiptEl = document.querySelector(`.${receiptFont.className}`);
+    if (!receiptEl) {
+      return;
+    }
     const canvas = await html2canvas(receiptEl as HTMLElement, {
       backgroundColor: '#fff',
       scale: 2,
@@ -105,7 +109,6 @@ export default function ReceiptCard({
     },
   });
 
-  // Infos additionnelles pour l’affichage
   const extraPersons = Math.max(0, (data.peopleCount ?? 1) - 1);
   const includesCcdPhone = hasDSLR && pricing.package === 'DSLR' && pricing.hours >= 2;
   const durationMinEnforced = pricing.hours !== Math.ceil(Math.max(1, data.durationHours || 1));
@@ -191,7 +194,6 @@ export default function ReceiptCard({
                 <Row label="People" value={String(data.peopleCount ?? 1)} />
                 {line}
 
-                {/* Type de package */}
                 <Row label="Package" value={cap(pricing.package.replace('_', ' '))} />
                 <Row label="Included edits" value={`${pricing.includedEdits}`} />
                 {data?.extraEdits !== 0 && <Row label="Extra edits" value={`${data.extraEdits}`} />}
@@ -242,10 +244,8 @@ export default function ReceiptCard({
                   Pricing (estimated)
                 </Text>
 
-                {/* Heures (utiliser pricing.hours pour refléter min QC) */}
                 <RowCurrency label={`${pricing.hours} hours`} amount={pricing.base} />
 
-                {/* Surcharge personnes */}
                 {pricing.peopleSurcharge > 0 && (
                   <RowCurrency
                     label={
@@ -257,17 +257,14 @@ export default function ReceiptCard({
                   />
                 )}
 
-                {/* Frais Québec City */}
                 {pricing.cityFee > 0 && (
                   <RowCurrency label="Quebec City fee" amount={pricing.cityFee} />
                 )}
 
-                {/* Transportation fee */}
                 {pricing.transportationFee > 0 && (
                   <RowCurrency label="Transportation fee (avg.)" amount={pricing.transportationFee} />
                 )}
 
-                {/* Add-on DSLR (si applicable) */}
                 {pricing.addonPhotos > 0 && (
                   <RowCurrency
                     label={`DSLR add-on (${pricing.addonPhotos} photo${
@@ -277,7 +274,6 @@ export default function ReceiptCard({
                   />
                 )}
 
-                {/* Edits inclus + extras */}
                 {pricing.extraEditsCost > 0 && (
                   <RowCurrency
                     label={`Extra edits (${pricing.extraEdits} × $${RATES.EDIT_EXTRA_PRICE})`}
@@ -285,7 +281,6 @@ export default function ReceiptCard({
                   />
                 )}
 
-                {/* Note si une durée minimale a été imposée (ex.: QC + DSLR min 4h) */}
                 {durationMinEnforced && (
                   <Text size="xs" c="dimmed">
                     • Minimum duration enforced by location/package rules
@@ -325,7 +320,6 @@ export default function ReceiptCard({
   );
 }
 
-/* ---------- UI helpers ---------- */
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <Group justify="space-between" gap={6}>
@@ -350,11 +344,11 @@ function RowCurrency({
 }) {
   return (
     <Group justify="space-between" gap={6}>
-      <Text size={'xs'} c={dimmed ? 'dimmed' : undefined}>
+      <Text size="xs" c={dimmed ? 'dimmed' : undefined}>
         {label}
       </Text>
       <Text
-        size={'xs'}
+        size="xs"
         c={dimmed ? 'dimmed' : undefined}
         fw={strong ? 800 : 500}
         style={{ fontVariantNumeric: 'tabular-nums' }}
@@ -373,7 +367,6 @@ function EquipLine({ label }: { label: string }) {
   );
 }
 
-/* ---------- utils ---------- */
 function short(id: string) {
   return id.slice(0, 6).toUpperCase();
 }

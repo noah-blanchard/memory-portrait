@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { ContactMethodEnum, PhotoshootTypeEnum } from '@/schemas/enums';
 
-// booking_status enum de ta BDD
 export const BookingStatusEnum = z.enum([
   'pending',
   'reviewed',
@@ -10,13 +9,11 @@ export const BookingStatusEnum = z.enum([
   'cancelled',
 ]);
 
-// Une ligne de booking_requests telle que renvoyée par la RPC
 export const bookingRowSchema = z.object({
   request_uid: z.uuid(),
   client_name: z.string(),
   photoshoot_kind: PhotoshootTypeEnum,
 
-  // Postgres -> JSON : range en string, timestamps en ISO string
   requested_period: z.string(),
 
   starts_at: z.iso.datetime({
@@ -45,7 +42,6 @@ export const bookingRowSchema = z.object({
   contact: z.string(),
 });
 
-// Résultat de la fonction booking_requests_grouped_by_status()
 export const bookingGroupedSchema = z.object({
   pending: z.array(bookingRowSchema),
   reviewed: z.array(bookingRowSchema),

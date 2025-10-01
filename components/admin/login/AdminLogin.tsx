@@ -3,23 +3,22 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Alert,
-  Button,
   Center,
   Container,
   Group,
   Paper,
   PasswordInput,
   Stack,
-  Text,
   TextInput,
-  Title,
 } from '@mantine/core';
+import { Alert, Button, Text, Title } from '@/components/I18nUI/I18nUI';
 import { useForm } from '@mantine/form';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { createClient } from '@/utils/supabase/client';
+import { useTranslation } from 'react-i18next';
 
 export default function AdminLogin() {
+  const { t } = useTranslation('common');
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -27,8 +26,8 @@ export default function AdminLogin() {
   const form = useForm({
     initialValues: { email: '', password: '' },
     validate: {
-      email: (v) => (/^\S+@\S+\.\S+$/.test(v) ? null : 'Invalid email'),
-      password: (v) => (v.length >= 6 ? null : 'Password must be at least 6 characters'),
+      email: (v) => (/^\S+@\S+\.\S+$/.test(v) ? null : t('admin_invalid_email')),
+      password: (v) => (v.length >= 6 ? null : t('admin_password_min')),
     },
   });
 
@@ -42,7 +41,6 @@ export default function AdminLogin() {
         setServerError(error.message);
         return;
       }
-      // redirect vers le dashboard admin (adapte la route)
       router.push('/admin');
       router.refresh();
     } catch (e: any) {
@@ -58,10 +56,10 @@ export default function AdminLogin() {
         <Paper withBorder shadow="sm" radius="lg" p="xl">
           <Stack gap="md">
             <Title order={3} ta="center">
-              Admin login
+              admin_login_title
             </Title>
             <Text c="dimmed" size="sm" ta="center">
-              Please sign in with your admin credentials.
+              admin_login_subtitle
             </Text>
 
             {serverError && (
@@ -69,7 +67,7 @@ export default function AdminLogin() {
                 variant="light"
                 color="red"
                 icon={<IconAlertCircle size={16} />}
-                title="Authentication failed"
+                title="admin_auth_failed"
               >
                 {serverError}
               </Alert>
@@ -78,16 +76,16 @@ export default function AdminLogin() {
             <form onSubmit={onSubmit}>
               <Stack gap="sm">
                 <TextInput
-                  label="Email"
-                  placeholder="admin@example.com"
+                  label={t('admin_email')}
+                  placeholder={t('admin_email_placeholder')}
                   withAsterisk
                   type="email"
                   autoComplete="email"
                   {...form.getInputProps('email')}
                 />
                 <PasswordInput
-                  label="Password"
-                  placeholder="••••••••"
+                  label={t('admin_password')}
+                  placeholder={t('admin_password_placeholder')}
                   withAsterisk
                   autoComplete="current-password"
                   {...form.getInputProps('password')}
@@ -95,7 +93,7 @@ export default function AdminLogin() {
 
                 <Group justify="center" mt="sm">
                   <Button type="submit" loading={loading} radius="md" fullWidth>
-                    Sign in
+                    common_sign_in
                   </Button>
                 </Group>
               </Stack>

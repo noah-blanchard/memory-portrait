@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Alert, Button, Center, Loader, Stack, Title } from '@mantine/core';
+import { Center, Loader, Stack } from '@mantine/core';
+import { Alert, Button, Title } from '@/components/I18nUI/I18nUI';
 import BookingsGroupedView from './ui/BookingsGroupedView';
 import type { BookingGrouped } from '@/schemas/bookingGrouped';
 import type { BookingStatus } from './statusTheme';
@@ -17,36 +18,42 @@ export default function BookingsPanel() {
     try {
       const res = await fetch('/api/bookings', { credentials: 'include' });
       const json = await res.json();
-      if (!res.ok || !json?.ok) throw new Error(json?.error?.message ?? 'Failed to fetch bookings');
+      if (!res.ok || !json?.ok) {
+        throw new Error(json?.error?.message ?? 'admin_failed_fetch');
+      }
       setData(json.data as BookingGrouped);
     } catch (e: any) {
-      setErr(e?.message ?? 'Unknown error');
+      setErr(e?.message ?? 'admin_unknown_error');
       setData(null);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
-  // 🔀 Changement de statut avec update optimiste + rollback si erreur
   const changeStatus = async (
     requestUid: string,
     from: BookingStatus,
     to: BookingStatus
   ): Promise<void> => {
-    if (!data || from === to) return;
+    if (!data || from === to) {
+      return;
+    }
 
-    // garde une copie pour rollback si besoin
     const snapshot = data;
 
-    // trouve la ligne à déplacer
     const moved = snapshot[from].find((r) => r.request_uid === requestUid);
-    if (!moved) return;
+    if (!moved) {
+      return;
+    }
 
-    // optimiste: retire de l'ancien groupe et ajoute au nouveau
     setData((prev) => {
-      if (!prev) return prev;
+      if (!prev) {
+        return prev;
+      }
       return {
         ...prev,
         [from]: prev[from].filter((r) => r.request_uid !== requestUid),
@@ -54,7 +61,6 @@ export default function BookingsPanel() {
       };
     });
 
-    // PATCH API
     const res = await fetch('/api/bookings/status', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -64,28 +70,31 @@ export default function BookingsPanel() {
     const json = await res.json();
 
     if (!res.ok || !json?.ok) {
-      // rollback
       setData(snapshot);
-      throw new Error(json?.error?.message ?? 'Failed to update status');
+      throw new Error(json?.error?.message ?? 'admin_failed_update');
     }
   };
 
-  if (loading) return (<Center mih="40dvh"><Loader /></Center>);
+  if (loading) {
+    return (<Center mih="40dvh"><Loader /></Center>);
+  }
 
   if (err) {
     return (
       <Stack>
-        <Alert color="red" variant="light" title="Error loading bookings">{err}</Alert>
-        <Button onClick={load} variant="light">Retry</Button>
+        <Alert color="red" variant="light" title="admin_error_loading">{err}</Alert>
+        <Button onClick={load} variant="light">common_retry</Button>
       </Stack>
     );
   }
 
-  if (!data) return null;
+  if (!data) {
+    return null;
+  }
 
   return (
     <Stack>
-      <Title size={20}>Bookings Overview</Title>
+      <Title size={20}>admin_bookings_title</Title>
       <BookingsGroupedView data={data} onChangeStatus={changeStatus} />
     </Stack>
   );

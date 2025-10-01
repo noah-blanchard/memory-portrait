@@ -4,14 +4,13 @@ import { useRef } from 'react';
 import { IconMinus, IconPlus } from '@tabler/icons-react';
 import {
   ActionIcon,
-  Badge,
   Group,
-  InputLabel,
   NumberInput,
   NumberInputHandlers,
   NumberInputProps,
   Stack,
 } from '@mantine/core';
+import { Badge, InputLabel } from '@/components/I18nUI/I18nUI';
 
 type Props = NumberInputProps & {
   description?: string;
@@ -23,12 +22,11 @@ export default function ButtonNumberInput({
   min = 1,
   max = 6,
   value,
-  size = 'lg', // <- force une hauteur cohérente
+  size = 'lg',
   ...props
 }: Props) {
   const handlersRef = useRef<NumberInputHandlers>(null);
 
-  // style commun pour caler les ronds exactement sur la hauteur de l'input
   const circleStyle = {
     width: 'var(--input-height)',
     height: 'var(--input-height)',
@@ -61,8 +59,8 @@ export default function ButtonNumberInput({
           min={min}
           max={max}
           value={value}
-          style={{ flex: 1 }} // <- le fait grandir
-          miw={0} // <- évite un min-width implicite
+          style={{ flex: 1 }}
+          miw={0}
         />
         <ActionIcon
           style={circleStyle}

@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  IconAt,
   IconBrandInstagram,
   IconBrandWechat,
   IconCheck,
@@ -9,12 +8,13 @@ import {
   IconMail,
   IconPhone,
 } from '@tabler/icons-react';
-import { Badge, CopyButton, Group, Text, Tooltip } from '@mantine/core';
-import { Button } from '@/components/I18nUI/I18nUI';
+import { CopyButton, Group } from '@mantine/core';
+import { Badge, Button } from '@/components/I18nUI/I18nUI';
+import { useTranslation } from 'react-i18next';
 
 const methodColors: Record<string, string> = {
   email: 'blue',
-  wechat: 'wechatGreen',
+  wechat: 'emerald',
   instagram: 'pink',
   phone: 'orange',
 };
@@ -26,6 +26,8 @@ export default function ContactPill({
   method: 'email' | 'wechat' | 'instagram' | 'phone';
   value: string;
 }) {
+  const { t } = useTranslation('common');
+  
   const icon =
     method === 'email' ? (
       <IconMail size={14} />
@@ -39,12 +41,12 @@ export default function ContactPill({
 
   const label =
     method === 'email'
-      ? 'Email'
+      ? t('contact_email')
       : method === 'wechat'
-        ? 'WeChat'
+        ? t('contact_wechat')
         : method === 'instagram'
-          ? 'Instagram'
-          : 'Phone';
+          ? t('contact_instagram')
+          : t('contact_phone');
 
   return (
     <Group gap={8} w="100%" wrap="nowrap" justify="space-between" align="center">
@@ -65,7 +67,7 @@ export default function ContactPill({
             rightSection={copied ? <IconCheck size={14} /> : <IconCopy size={14} />}
             color={copied ? 'green' : 'gray'}
           >
-            {value}
+            {copied ? t('copied') : value}
           </Button>
         )}
       </CopyButton>

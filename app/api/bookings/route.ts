@@ -6,7 +6,7 @@ import { json } from '@/utils/api/helpers';
 import { createServerClient } from '@/utils/supabase/server';
 import { createBookingArgs } from './helpers';
 
-export const runtime = 'nodejs'; // IMPORTANT: SMTP ≠ Edge
+export const runtime = 'nodejs';
 
 export async function POST(req: Request) {
   const ct = req.headers.get('content-type') ?? '';
@@ -74,21 +74,16 @@ export async function POST(req: Request) {
       return json({ ok: false, error: { code: 'rpc_error', message: msg } }, 500);
     }
 
-    // -----------------------------
-    // EMAIL AFTER SUCCESSFUL INSERT
-    // -----------------------------
     try {
       const r = data as any; // ce que renvoie ta RPC (idéalement la ligne insérée)
       const d = parsed.data;
 
-      // Helpers ------------- //
-      const tz = 'America/Toronto'; // Montréal
+      const tz = 'America/Toronto';
       const fmt = (dateLike: string | Date | undefined | null) => {
         if (!dateLike) {
           return 'N/A';
         }
         const dt = typeof dateLike === 'string' ? new Date(dateLike) : dateLike;
-        // ex: Tue, Sep 02, 2025 • 14:30 EDT
         return new Intl.DateTimeFormat('en-CA', {
           timeZone: tz,
           year: 'numeric',
@@ -109,7 +104,6 @@ export async function POST(req: Request) {
         return `$${(cents / 100).toFixed(2)} CAD`;
       };
 
-      // Récupération des valeurs depuis r (DB) sinon depuis le body validé
       const clientName = r?.client_name ?? d.clientName;
       const photoshootKind = r?.photoshoot_kind ?? d.photoshootKind;
       const startsAt = r?.starts_at ?? d.start;
@@ -122,7 +116,6 @@ export async function POST(req: Request) {
       const contactMethod = r?.contact_method ?? d.contactMethod;
       const contact = r?.contact ?? d.contact;
 
-      // Équipements
       const hasCanonIxus = r?.has_ccd_canon_ixus980is ?? d.equipCanonIxus980is ?? false;
       const hasHpCcd = r?.has_ccd_hp ?? d.equipHpCcd ?? false;
       const hasIphoneX = r?.has_phone_iphone_x ?? d.equipIphoneX ?? false;
@@ -131,7 +124,6 @@ export async function POST(req: Request) {
       const dslrAddonPhotos = r?.dslr_addon_photos ?? d.dslrAddonPhotos ?? null;
       const extraEdits = r?.extra_edits ?? d.extraEdits ?? 0;
 
-      // Construction d’une liste d’équipements lisible
       const equipments: string[] = [];
       if (hasCanonIxus) {
         equipments.push('CCD Canon IXUS 980 IS');
@@ -229,7 +221,6 @@ export async function POST(req: Request) {
         fromName: 'Memory Booking Platform',
       });
     } catch (mailErr) {
-      // pass
     }
 
     return json({ ok: true, data }, 201);

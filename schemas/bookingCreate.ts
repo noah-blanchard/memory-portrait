@@ -1,4 +1,3 @@
-// src/schemas/booking.ts
 import { z } from 'zod';
 import { ContactMethodEnum, PhotoshootTypeEnum } from './enums';
 import { normalizeWhitespace, stripPhone } from './helpers';
@@ -49,15 +48,12 @@ export const bookingCreateSchema = z
       .optional()
       .default(undefined),
 
-    // --------- ÉQUIPEMENTS ----------
     equipCanonIxus980is: z.boolean().default(false),
     equipHpCcd: z.boolean().default(false),
     equipIphoneX: z.boolean().default(false),
     equipIphone13: z.boolean().default(false),
     equipNikonDslr: z.boolean().default(false),
 
-    // Add-on DSLR (nombre de photos) :
-    // nullable/opcional, mais obligatoire (>=3) quand DSLR + (CCD ou Phone)
     dslrAddonPhotos: z.coerce
       .number()
       .int()
@@ -65,8 +61,6 @@ export const bookingCreateSchema = z
       .optional()
       .nullable(),
 
-    // --------- RETOUCHES SUPPLÉMENTAIRES ----------
-    // Nombre d’allers-retours de retouche supplémentaires au-delà de ce qui est inclus
     extraEdits: z.coerce
       .number()
       .int()
@@ -75,12 +69,10 @@ export const bookingCreateSchema = z
       .default(0),
   })
   .superRefine((val, ctx) => {
-    // 1) période valide
     if (val.start.getTime() >= val.end.getTime()) {
       ctx.addIssue({ code: 'custom', path: ['end'], message: 'End must be after start' });
     }
 
-    // 2) contact valide selon méthode
     const c = val.contact;
     switch (val.contactMethod) {
       case 'email': {
@@ -126,7 +118,6 @@ export const bookingCreateSchema = z
       }
     }
 
-    // 3) au moins un équipement
     const anyEquip =
       val.equipCanonIxus980is ||
       val.equipHpCcd ||
@@ -142,7 +133,6 @@ export const bookingCreateSchema = z
       });
     }
 
-    // 4) règles add-on DSLR (inchangées)
     const hasCCDorPhone =
       val.equipCanonIxus980is || val.equipHpCcd || val.equipIphoneX || val.equipIphone13;
     const hasDSLR = val.equipNikonDslr;

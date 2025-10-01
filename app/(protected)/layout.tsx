@@ -1,4 +1,3 @@
-// app/(admin)/layout.tsx
 import { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 import { createServerClient } from '@/utils/supabase/server';
@@ -18,9 +17,8 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
   return (
     <Container
       fluid
-      px="lg"      // horizontal padding
-      py="lg"      // vertical padding
-      // keeps nice spacing on iOS safe areas too:
+      px="lg"
+      py="lg"
       style={{
         paddingLeft: 'calc(var(--mantine-spacing-lg) + env(safe-area-inset-left))',
         paddingRight: 'calc(var(--mantine-spacing-lg) + env(safe-area-inset-right))',

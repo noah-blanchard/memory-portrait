@@ -8,13 +8,15 @@ import {
   IconBan, IconSearch, IconHourglassHigh,
 } from '@tabler/icons-react';
 import {
-  ActionIcon, Card, CopyButton, Divider, Group, Menu, rem,
-  Stack, Text, Tooltip, Button,
+  ActionIcon, Card, CopyButton, Group,
+  Stack,
 } from '@mantine/core';
+import { Button, Divider, Menu, Text, Tooltip } from '@/components/I18nUI/I18nUI';
 import type { BookingRequestsRow } from '@/types/db-rows';
 import ContactPill from './ContactPill';
 import StatusBadge from './StatusBadge';
 import { STATUS_META, STATUS_ORDER, type BookingStatus } from '../statusTheme';
+import { useTranslation } from 'react-i18next';
 
 export default function BookingCard({
   row,
@@ -23,12 +25,15 @@ export default function BookingCard({
   row: Omit<BookingRequestsRow, 'id'>;
   onChangeStatus: (uid: string, from: BookingStatus, to: BookingStatus) => Promise<void>;
 }) {
+  const { t } = useTranslation('common');
   const start = dayjs(row.starts_at);
   const end = dayjs(row.ends_at);
   const [changing, setChanging] = useState(false);
 
   const handleSelect = async (to: BookingStatus) => {
-    if (to === row.status) return;
+    if (to === row.status) {
+      return;
+    }
     setChanging(true);
     try {
       await onChangeStatus(row.request_uid, row.status as BookingStatus, to);
@@ -40,7 +45,6 @@ export default function BookingCard({
   return (
     <Card withBorder radius="md" shadow="xs" p="md">
       <Stack gap="xs">
-        {/* header */}
         <Group justify="space-between" wrap="nowrap" align="center">
           <Text fw={700} truncate>{row.client_name}</Text>
           <Group gap="xs">
@@ -54,11 +58,11 @@ export default function BookingCard({
                   leftSection={<IconDots size={16} />}
                   loading={changing}
                 >
-                  Change
+                  common_change
                 </Button>
               </Menu.Target>
               <Menu.Dropdown>
-                <Menu.Label>Set status</Menu.Label>
+                <Menu.Label>admin_set_status</Menu.Label>
                 {STATUS_ORDER.map((s) => {
                   const meta = STATUS_META[s];
                   const left =
@@ -92,9 +96,9 @@ export default function BookingCard({
           </Text>
           <CopyButton value={row.request_uid}>
             {({ copied, copy }) => (
-              <Tooltip label={copied ? 'Copied' : 'Copy ID'} withArrow>
+              <Tooltip label={copied ? 'copied' : 'copy_id'} withArrow>
                 <ActionIcon size="sm" variant="subtle" onClick={copy}>
-                  {copied ? <IconCheck size={14} /> : <IconCopy size={14} />}
+                  {copied ? <IconCheck size={14} />  : <IconCopy size={14} />}
                 </ActionIcon>
               </Tooltip>
             )}
@@ -103,20 +107,18 @@ export default function BookingCard({
 
         <Divider my={4} />
 
-        {/* infos principales */}
         <Stack gap={6}>
-          <Line icon={<IconCamera size={16} />} label="Type" value={cap(row.photoshoot_kind)} />
-          {row.location && <Line icon={<IconMapPin size={16} />} label="Location" value={row.location} />}
-          <Line icon={<IconUsers size={16} />} label="People" value={String(row.people_count)} />
+          <Line icon={<IconCamera size={16} />} label={t('booking_type')} value={cap(row.photoshoot_kind)} />
+          {row.location && <Line icon={<IconMapPin size={16} />} label={t('booking_location')} value={row.location} />}
+          <Line icon={<IconUsers size={16} />} label={t('booking_people')} value={String(row.people_count)} />
         </Stack>
 
         <Divider my={4} />
 
-        {/* dates/heures */}
         <Stack gap={6} style={{ fontVariantNumeric: 'tabular-nums' }}>
-          <Line icon={<IconCalendar size={16} />} label="Date" value={start.format('YYYY-MM-DD')} />
-          <Line icon={<IconClock size={16} />} label="Start" value={start.format('HH:mm')} />
-          <Line icon={<IconClock size={16} />} label="End" value={end.format('HH:mm')} />
+          <Line icon={<IconCalendar size={16} />} label={t('booking_date')} value={start.format('YYYY-MM-DD')} />
+          <Line icon={<IconClock size={16} />} label={t('booking_start')} value={start.format('HH:mm')} />
+          <Line icon={<IconClock size={16} />} label={t('booking_end')} value={end.format('HH:mm')} />
         </Stack>
 
         <Group mt="xs">

@@ -1,7 +1,8 @@
 'use client';
 
 import { useLocalStorage } from '@mantine/hooks';
-import { ActionIcon, Badge, Collapse, Divider, Group, Stack, Text } from '@mantine/core';
+import { ActionIcon, Collapse, Group, Stack } from '@mantine/core';
+import { Badge, Divider, Text } from '@/components/I18nUI/I18nUI';
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react';
 
 import type { BookingRequestsRow } from '@/types/db-rows';
@@ -46,7 +47,7 @@ export default function BookingsGroup({
       <Collapse in={opened}>
         <Stack gap="sm" pt="xs">
           {items.length === 0 ? (
-            <Text c="dimmed" size="sm">No requests</Text>
+            <Text c="dimmed" size="sm">admin_no_requests</Text>
           ) : (
             items.map((row) => (
               <BookingCard

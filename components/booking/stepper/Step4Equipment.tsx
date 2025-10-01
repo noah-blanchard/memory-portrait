@@ -15,7 +15,7 @@ type Props = {
   onNext: () => void;
 };
 
-export default function Step3Equipment({ form, loading, onBack, onNext }: Props) {
+export default function Step4Equipment({ form, loading, onBack, onNext }: Props) {
   const { t } = useTranslation('common');
   const v = form.values;
 
