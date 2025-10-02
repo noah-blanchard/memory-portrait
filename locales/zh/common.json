@@ -205,5 +205,11 @@
   "current": "当前",
   "upcoming": "即将开始",
   
+  "time_hours": "小时",
+  "time_minutes": "分钟",
+  "select_time": "选择时间",
+  "cancel": "取消",
+  "confirm": "确认",
+  
   "transition_smile": "笑一个！"
 }

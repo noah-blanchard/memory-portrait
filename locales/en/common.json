@@ -205,5 +205,11 @@
   "current": "Current",
   "upcoming": "Upcoming",
   
+  "time_hours": "Hours",
+  "time_minutes": "Minutes",
+  "select_time": "Select Time",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  
   "transition_smile": "Smile!"
 }

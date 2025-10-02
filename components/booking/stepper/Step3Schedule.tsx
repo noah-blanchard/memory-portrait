@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { IconCalendar, IconClock, IconSparkles } from '@tabler/icons-react';
+import { IconCalendar, IconSparkles } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { Box, Group, Paper, rem, Stack, Text, Transition, useMantineTheme } from '@mantine/core';
-import { DatePickerInput, TimePicker } from '@mantine/dates';
+import { DatePickerInput } from '@mantine/dates';
 import { useMediaQuery } from '@mantine/hooks';
 import ButtonNumberInput from '@/components/number/NumberInput';
+import TimeInput from '@/components/time/TimeInput';
 import type { BookingStepProps } from '@/types/components';
 
 export interface Step3ScheduleValues {
@@ -89,14 +90,13 @@ export default function Step3Schedule({
                 transition: 'all 0.2s ease',
               }}
             >
-              <TimePicker
+              <TimeInput
                 disabled={_loading}
                 label={t('step4_start_time')}
-                minutesStep={15}
-                withDropdown
-                withAsterisk
-                leftSection={<IconClock size={isMobile ? 18 : 16} />}
+                required
                 size={isMobile ? 'md' : 'sm'}
+                min="06:00"
+                max="22:00"
                 {...form.getInputProps('time')}
               />
             </Paper>
