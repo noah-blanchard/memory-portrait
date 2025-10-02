@@ -13,9 +13,13 @@ import {
 } from '@mantine/core';
 import { Badge, InputLabel } from '@/components/I18nUI/I18nUI';
 
-type Props = NumberInputProps & {
+export interface ButtonNumberInputProps extends NumberInputProps {
   description?: string;
-};
+  min?: number;
+  max?: number;
+  value?: number;
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+}
 
 export default function ButtonNumberInput({
   label,
@@ -25,7 +29,7 @@ export default function ButtonNumberInput({
   value,
   size = 'lg',
   ...props
-}: Props) {
+}: ButtonNumberInputProps) {
   const { t } = useTranslation('common');
   const handlersRef = useRef<NumberInputHandlers>(null);
 

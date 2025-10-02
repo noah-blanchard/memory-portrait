@@ -1,10 +1,5 @@
-export type EquipmentSelection = {
-  equipCanonIxus980is?: boolean;
-  equipHpCcd?: boolean;
-  equipIphoneX?: boolean;
-  equipIphone13?: boolean;
-  equipNikonDslr?: boolean;
-};
+import type { PricingParams } from '@/types/components';
+import { round2, ceilHours } from '@/utils/common';
 
 export type PriceBreakdown = {
   package: 'CCD/Phone' | 'DSLR' | 'None';
@@ -43,24 +38,10 @@ export const RATES = {
   DSLR_ADDON_MIN_PHOTOS: 3,
 } as const;
 
-function ceilHours(h: number): number {
-  if (!Number.isFinite(h) || h <= 0) {
-    return 1;
-  }
-  return Math.ceil(h);
-}
-function round2(n: number): number {
-  return Math.round(n * 100) / 100;
-}
 
-export function estimatePrice(params: {
-  people?: number;
-  equipment: EquipmentSelection;
-  durationHours: number;
+export function estimatePrice(params: PricingParams & {
   addonPhotos?: number | null;
-  location?: 'Montreal' | 'Quebec City';
   transportationFee?: number;
-  extraEdits?: number;
 }): PriceBreakdown {
   const people = Math.max(1, Math.floor(params.people ?? 1));
   const location = params.location ?? 'Montreal';

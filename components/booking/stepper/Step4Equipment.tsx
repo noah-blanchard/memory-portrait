@@ -24,23 +24,25 @@ import {
   Transition,
   useMantineTheme,
 } from '@mantine/core';
-import type { UseFormReturnType } from '@mantine/form';
 import { useMediaQuery } from '@mantine/hooks';
 import { Alert, Title } from '@/components/I18nUI/I18nUI';
+import type { BookingStepProps, EquipmentSelection } from '@/types/components';
 
-type Props = {
-  form: UseFormReturnType<any>;
-  loading: boolean;
-  onBack: () => void;
-  onNext: () => void;
-};
+export interface Step4EquipmentValues extends EquipmentSelection {
+  durationHours: number;
+  dslrAddonPhotos?: number;
+}
+
+export interface Step4EquipmentProps extends BookingStepProps {
+  // Full navigation available in step 4
+}
 
 export default function Step4Equipment({
   form,
-  loading: _loading,
+  loading: _loading = false,
   onBack: _onBack,
   onNext: _onNext,
-}: Props) {
+}: Step4EquipmentProps) {
   const { t } = useTranslation('common');
   const theme = useMantineTheme();
   const isMobile = useMediaQuery('(max-width: 768px)');

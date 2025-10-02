@@ -13,31 +13,39 @@ import {
   Transition,
   useMantineTheme,
 } from '@mantine/core';
-import type { UseFormReturnType } from '@mantine/form';
 import { useMediaQuery } from '@mantine/hooks';
+import type { BookingStepProps, ContactMethod } from '@/types/components';
 
-export type Step1Values = {
+export interface Step1ContactValues {
   clientName: string;
-  contactMethod: string;
+  contactMethod: ContactMethod;
   contact: string;
-};
+}
 
-const methodIcon = (m: Step1Values['contactMethod'], size = 16) => {
-  switch (m) {
+export interface Step1ContactProps extends Omit<BookingStepProps, 'onBack'> {
+  // Step 1 doesn't have a back button
+}
+
+const methodIcon = (method: ContactMethod, size = 16) => {
+  switch (method) {
     case 'wechat':
       return <IconBrandWechat size={size} />;
     case 'instagram':
       return <IconBrandInstagram size={size} />;
+    case 'email':
+      return <IconUser size={size} />; // Using User icon for email as fallback
+    case 'phone':
+      return <IconUser size={size} />; // Using User icon for phone as fallback
+    default:
+      return <IconUser size={size} />;
   }
 };
 
 export default function Step1Contact({
   form,
   onNext: _onNext,
-}: {
-  form: UseFormReturnType<any>;
-  onNext: () => void;
-}) {
+  loading: _loading = false,
+}: Step1ContactProps) {
   const { t } = useTranslation('common');
   const theme = useMantineTheme();
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -47,9 +55,11 @@ export default function Step1Contact({
     setMounted(true);
   }, []);
 
-  const placeholderByMethod: Record<Step1Values['contactMethod'], string> = {
+  const placeholderByMethod: Record<ContactMethod, string> = {
     wechat: t('step1_wechat_placeholder'),
     instagram: t('step1_instagram_placeholder'),
+    email: 'email@example.com',
+    phone: '+1234567890',
   };
 
   return (
@@ -129,7 +139,7 @@ export default function Step1Contact({
                   <TextInput
                     label={t('step1_contact_label')}
                     leftSection={methodIcon(form.values.contactMethod, isMobile ? 18 : 16)}
-                    placeholder={placeholderByMethod[form.values.contactMethod]}
+                    placeholder={placeholderByMethod[form.values.contactMethod as ContactMethod]}
                     withAsterisk
                     size={isMobile ? 'md' : 'sm'}
                     {...form.getInputProps('contact')}

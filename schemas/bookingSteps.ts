@@ -1,9 +1,7 @@
 import { z } from 'zod';
 import { bookingCreateSchema, type BookingCreateInput } from './bookingCreate';
 import { ContactMethodEnum, PhotoshootTypeEnum } from './enums';
-
-const normalizeWhitespace = (s: string) => s.replace(/\s+/g, ' ').trim();
-const stripPhone = (s: string) => s.replace(/[^\d+]/g, '');
+import { normalizeWhitespace, stripPhone, mergeDateTime } from '@/utils/common';
 function validateContactForMethod(
   method: BookingCreateInput['contactMethod'],
   contact: string,
@@ -195,12 +193,6 @@ export type DetailsStep = z.infer<typeof detailsStepSchema>;
 export type ScheduleStep = z.infer<typeof scheduleStepSchema>;
 export type EquipmentStep = z.infer<typeof equipmentStepSchema>;
 
-function mergeDateTime(d: Date, hhmm: string): Date {
-  const [h, m] = hhmm.split(':').map((n) => parseInt(n, 10));
-  const out = new Date(d);
-  out.setHours(h, m, 0, 0);
-  return out;
-}
 
 export function buildAndValidateBooking(
   contact: ContactStep,

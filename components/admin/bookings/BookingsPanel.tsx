@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Center, Loader, Stack } from '@mantine/core';
 import { Alert, Button, Title } from '@/components/I18nUI/I18nUI';
 import type { BookingGrouped } from '@/schemas/bookingGrouped';
-import type { BookingStatus } from './statusTheme';
+import type { BookingStatus } from '@/types/components';
 import BookingsGroupedView from './ui/BookingsGroupedView';
 
 export default function BookingsPanel() {
@@ -45,7 +45,7 @@ export default function BookingsPanel() {
 
     const snapshot = data;
 
-    const moved = snapshot[from].find((r) => r.request_uid === requestUid);
+    const moved = snapshot[from as keyof BookingGrouped].find((r: any) => r.request_uid === requestUid);
     if (!moved) {
       return;
     }
@@ -56,8 +56,8 @@ export default function BookingsPanel() {
       }
       return {
         ...prev,
-        [from]: prev[from].filter((r) => r.request_uid !== requestUid),
-        [to]: [{ ...moved, status: to }, ...prev[to]],
+        [from]: prev[from as keyof BookingGrouped].filter((r: any) => r.request_uid !== requestUid),
+        [to]: [{ ...moved, status: to }, ...prev[to as keyof BookingGrouped]],
       };
     });
 

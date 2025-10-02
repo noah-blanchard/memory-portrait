@@ -37,13 +37,15 @@ export type ReceiptData = {
   extraEdits?: number;
 };
 
+export interface ReceiptCardProps {
+  data: ReceiptData | null;
+  onNew: () => void;
+}
+
 export default function ReceiptCard({
   data,
   onNew,
-}: {
-  data: ReceiptData | null;
-  onNew: () => void;
-}) {
+}: ReceiptCardProps) {
   const { t } = useTranslation('common');
   const mounted = !!data;
   const [opened, setOpened] = useState(false);

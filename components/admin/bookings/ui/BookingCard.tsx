@@ -23,17 +23,20 @@ import { useTranslation } from 'react-i18next';
 import { ActionIcon, Card, CopyButton, Group, Stack } from '@mantine/core';
 import { Button, Divider, Menu, Text, Tooltip } from '@/components/I18nUI/I18nUI';
 import type { BookingRequestsRow } from '@/types/db-rows';
-import { STATUS_META, STATUS_ORDER, type BookingStatus } from '../statusTheme';
+import type { BookingStatus } from '@/types/components';
+import { STATUS_META, STATUS_ORDER } from '../statusTheme';
 import ContactPill from './ContactPill';
 import StatusBadge from './StatusBadge';
+
+export interface BookingCardProps {
+  row: Omit<BookingRequestsRow, 'id'>;
+  onChangeStatus: (uid: string, from: BookingStatus, to: BookingStatus) => Promise<void>;
+}
 
 export default function BookingCard({
   row,
   onChangeStatus,
-}: {
-  row: Omit<BookingRequestsRow, 'id'>;
-  onChangeStatus: (uid: string, from: BookingStatus, to: BookingStatus) => Promise<void>;
-}) {
+}: BookingCardProps) {
   const { t } = useTranslation('common');
   const start = dayjs(row.starts_at);
   const end = dayjs(row.ends_at);

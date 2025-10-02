@@ -23,22 +23,19 @@ import {
   Transition,
   useMantineTheme,
 } from '@mantine/core';
-import type { UseFormReturnType } from '@mantine/form';
 import { useMediaQuery } from '@mantine/hooks';
 import { estimatePrice } from './helpers';
+import type { BookingStepProps } from '@/types/components';
 
-interface Step5ReviewProps {
-  form: UseFormReturnType<any>;
-  onBack: () => void;
-  onNext: () => void;
-  loading: boolean;
+export interface Step5ReviewProps extends BookingStepProps {
+  // Full navigation available in step 5 (review)
 }
 
 export default function Step5Review({
   form,
   onBack: _onBack,
   onNext: _onNext,
-  loading: _loading,
+  loading: _loading = false,
 }: Step5ReviewProps) {
   const { t } = useTranslation('common');
   const theme = useMantineTheme();

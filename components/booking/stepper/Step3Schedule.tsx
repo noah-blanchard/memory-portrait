@@ -5,21 +5,27 @@ import { IconCalendar, IconClock, IconSparkles } from '@tabler/icons-react';
 import { useTranslation } from 'react-i18next';
 import { Box, Group, Paper, rem, Stack, Text, Transition, useMantineTheme } from '@mantine/core';
 import { DatePickerInput, TimePicker } from '@mantine/dates';
-import type { UseFormReturnType } from '@mantine/form';
 import { useMediaQuery } from '@mantine/hooks';
 import ButtonNumberInput from '@/components/number/NumberInput';
+import type { BookingStepProps } from '@/types/components';
+
+export interface Step3ScheduleValues {
+  date: Date | null;
+  time: string;
+  durationHours: number;
+  extraEdits?: number;
+}
+
+export interface Step3ScheduleProps extends BookingStepProps {
+  // Full navigation available in step 3
+}
 
 export default function Step3Schedule({
   form,
   onBack: _onBack,
   onNext: _onNext,
-  loading: _loading,
-}: {
-  form: UseFormReturnType<any>;
-  onBack: () => void;
-  onNext: () => void;
-  loading: boolean;
-}) {
+  loading: _loading = false,
+}: Step3ScheduleProps) {
   const { t } = useTranslation('common');
   const theme = useMantineTheme();
   const isMobile = useMediaQuery('(max-width: 768px)');

@@ -43,13 +43,7 @@ import Step2Details from './Step2Details';
 import Step3Schedule from './Step3Schedule';
 import Step4Equipment from './Step4Equipment';
 import Step5Review from './Step5Review';
-
-function mergeDateTime(d: Date, hhmm: string): Date {
-  const [h, m] = hhmm.split(':').map((n) => parseInt(n, 10));
-  const out = new Date(d);
-  out.setHours(h, m, 0, 0);
-  return out;
-}
+import { mergeDateTime } from '@/utils/common';
 
 export default function BookingStepperForm() {
   const { t, i18n } = useTranslation('common');

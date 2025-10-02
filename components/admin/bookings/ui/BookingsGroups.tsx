@@ -5,7 +5,8 @@ import { ActionIcon, Collapse, Group, Stack } from '@mantine/core';
 import { useLocalStorage } from '@mantine/hooks';
 import { Badge, Divider, Text } from '@/components/I18nUI/I18nUI';
 import type { BookingRequestsRow } from '@/types/db-rows';
-import { STATUS_META, type BookingStatus } from '../statusTheme';
+import { STATUS_META } from '../statusTheme';
+import type { BookingStatus } from '@/types/components';
 import BookingCard from './BookingCard';
 import StatusBadge from './StatusBadge';
 
@@ -20,7 +21,7 @@ export default function BookingsGroup({
   defaultOpened?: boolean;
   onChangeStatus: (uid: string, from: BookingStatus, to: BookingStatus) => Promise<void>;
 }) {
-  const meta = STATUS_META[status];
+  const meta = STATUS_META[status as keyof typeof STATUS_META];
 
   const [opened, setOpened] = useLocalStorage<boolean>({
     key: `bookings-group-open-${status}`,

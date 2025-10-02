@@ -6,15 +6,16 @@ import {
   IconSearch,
   type Icon as TablerIcon,
 } from '@tabler/icons-react';
-import { z } from 'zod';
-import { BookingStatusEnum } from '@/schemas/bookingGrouped';
+import type { BookingStatus } from '@/types/components';
 
-export type BookingStatus = z.infer<typeof BookingStatusEnum>;
-export type StatusMeta = {
+// Re-export for backward compatibility
+export type { BookingStatus };
+
+export interface StatusMeta {
   label: string;
   color: string; // Mantine color key, ex: "green"
   Icon: TablerIcon;
-};
+}
 
 export const STATUS_META: Record<BookingStatus, StatusMeta> = {
   pending: { label: 'status_pending', color: 'yellow', Icon: IconHourglassHigh },

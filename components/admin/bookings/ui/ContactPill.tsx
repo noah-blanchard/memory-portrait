@@ -11,21 +11,24 @@ import {
 import { useTranslation } from 'react-i18next';
 import { CopyButton, Group } from '@mantine/core';
 import { Badge, Button } from '@/components/I18nUI/I18nUI';
+import type { ContactMethod } from '@/types/components';
 
-const methodColors: Record<string, string> = {
+const methodColors: Record<ContactMethod, string> = {
   email: 'blue',
   wechat: 'emerald',
   instagram: 'pink',
   phone: 'orange',
 };
 
+export interface ContactPillProps {
+  method: ContactMethod;
+  value: string;
+}
+
 export default function ContactPill({
   method,
   value,
-}: {
-  method: 'email' | 'wechat' | 'instagram' | 'phone';
-  value: string;
-}) {
+}: ContactPillProps) {
   const { t } = useTranslation('common');
 
   const icon =

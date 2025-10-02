@@ -14,20 +14,27 @@ import {
   Transition,
   useMantineTheme,
 } from '@mantine/core';
-import type { UseFormReturnType } from '@mantine/form';
 import { useMediaQuery } from '@mantine/hooks';
 import { InputLabel } from '@/components/I18nUI/I18nUI';
 import ButtonNumberInput from '@/components/number/NumberInput';
+import type { BookingStepProps, PhotoshootType } from '@/types/components';
+
+export interface Step2DetailsValues {
+  photoshootKind: PhotoshootType;
+  location: string;
+  peopleCount: number;
+}
+
+export interface Step2DetailsProps extends BookingStepProps {
+  // Full navigation available in step 2
+}
 
 export default function Step2Details({
   form,
   onBack: _onBack,
   onNext: _onNext,
-}: {
-  form: UseFormReturnType<any>;
-  onBack: () => void;
-  onNext: () => void;
-}) {
+  loading: _loading = false,
+}: Step2DetailsProps) {
   const { t } = useTranslation('common');
   const theme = useMantineTheme();
   const isMobile = useMediaQuery('(max-width: 768px)');
