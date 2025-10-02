@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 
 interface PageTransitionProps {
   children: React.ReactNode;
@@ -37,6 +38,7 @@ export const triggerPageTransition = (targetUrl: string, triggerElement?: HTMLEl
 
 export default function PageTransition({ children }: PageTransitionProps) {
   const router = useRouter();
+  const { t } = useTranslation('common');
   const [transitionState, setTransitionState] = useState<TransitionState>(globalTransitionState);
 
   useEffect(() => {
@@ -71,7 +73,7 @@ export default function PageTransition({ children }: PageTransitionProps) {
           };
           setTransitionState({ ...globalTransitionState });
         }, 100);
-      }, 1200); // Total animation duration
+      }, 2000); // Total animation duration - increased to 2 seconds
 
       return () => clearTimeout(timer);
     }
@@ -121,7 +123,7 @@ export default function PageTransition({ children }: PageTransitionProps) {
               height: '100vh',
               borderRadius: '0px',
               transition: {
-                duration: 0.8,
+                duration: 1.0,
                 ease: [0.25, 0.1, 0.25, 1], // Custom cubic-bezier for smooth expansion
               },
             }}
@@ -143,16 +145,17 @@ export default function PageTransition({ children }: PageTransitionProps) {
         )}
       </AnimatePresence>
 
-      {/* Loading indicator during transition */}
+      {/* Animated camera icon during transition */}
       <AnimatePresence>
         {transitionState.isTransitioning && (
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={{ opacity: 0, scale: 0.5 }}
             animate={{ 
               opacity: 1,
-              transition: { delay: 0.6, duration: 0.3 }
+              scale: 1,
+              transition: { delay: 0.6, duration: 0.5, ease: "backOut" }
             }}
-            exit={{ opacity: 0 }}
+            exit={{ opacity: 0, scale: 0.5 }}
             style={{
               position: 'fixed',
               top: '50%',
@@ -162,23 +165,185 @@ export default function PageTransition({ children }: PageTransitionProps) {
               pointerEvents: 'none',
             }}
           >
+            {/* Camera Body */}
             <motion.div
               animate={{
-                rotate: 360,
+                y: [0, -2, 0],
                 transition: {
-                  duration: 1,
+                  duration: 0.6,
                   repeat: Infinity,
-                  ease: 'linear',
-                },
+                  ease: "easeInOut",
+                }
               }}
               style={{
-                width: '40px',
-                height: '40px',
-                border: '3px solid rgba(255, 255, 255, 0.3)',
-                borderTop: '3px solid white',
-                borderRadius: '50%',
+                position: 'relative',
+                width: '48px',
+                height: '36px',
+                backgroundColor: 'white',
+                borderRadius: '6px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
               }}
-            />
+            >
+              {/* Camera Lens */}
+              <motion.div
+                animate={{
+                  scale: [1, 1.1, 1],
+                  transition: {
+                    duration: 0.8,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }
+                }}
+                style={{
+                  position: 'absolute',
+                  top: '18px',
+                  left: '24px',
+                  transform: 'translate(-50%, -50%)',
+                  width: '24px',
+                  height: '24px',
+                  backgroundColor: '#374151',
+                  borderRadius: '50%',
+                  border: '2px solid #6B7280',
+                }}
+              >
+                {/* Lens Center */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '12px',
+                    height: '12px',
+                    backgroundColor: '#111827',
+                    borderRadius: '50%',
+                  }}
+                >
+                  {/* Lens Reflection */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '1px',
+                      left: '1px',
+                      width: '3px',
+                      height: '3px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                      borderRadius: '50%',
+                    }}
+                  />
+                </div>
+              </motion.div>
+              
+              {/* Camera Flash */}
+              <motion.div
+                animate={{
+                  opacity: [0, 1, 0],
+                  scale: [0.8, 1.2, 0.8],
+                  transition: {
+                    duration: 1.2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }
+                }}
+                style={{
+                  position: 'absolute',
+                  top: '8px',
+                  right: '8px',
+                  width: '6px',
+                  height: '4px',
+                  backgroundColor: '#FEF3C7',
+                  borderRadius: '2px',
+                  boxShadow: '0 0 8px rgba(254, 243, 199, 0.8)',
+                }}
+              />
+              
+              {/* Viewfinder */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '6px',
+                  left: '8px',
+                  width: '8px',
+                  height: '6px',
+                  backgroundColor: '#1F2937',
+                  borderRadius: '2px',
+                }}
+              />
+            </motion.div>
+            
+            {/* Flash Effect */}
+            <AnimatePresence>
+              <motion.div
+                key="flash"
+                initial={{ opacity: 0, scale: 0.3 }}
+                animate={{
+                  opacity: [0, 0.9, 0],
+                  scale: [0.3, 3.5, 5],
+                  transition: {
+                    duration: 0.4,
+                    repeat: Infinity,
+                    repeatDelay: 0.8,
+                    ease: "easeOut",
+                  }
+                }}
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: '100px',
+                  height: '100px',
+                  background: 'radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.4) 40%, transparent 70%)',
+                  borderRadius: '50%',
+                  pointerEvents: 'none',
+                }}
+              />
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* "Smile!" Text */}
+      <AnimatePresence>
+        {transitionState.isTransitioning && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.8 }}
+            animate={{ 
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              transition: { delay: 0.9, duration: 0.5, ease: "backOut" }
+            }}
+            exit={{ opacity: 0, y: -10, scale: 0.8 }}
+            style={{
+              position: 'fixed',
+              top: '60%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 10001,
+              pointerEvents: 'none',
+            }}
+          >
+            <motion.div
+              animate={{
+                scale: [1, 1.05, 1],
+                transition: {
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }
+              }}
+              style={{
+                fontSize: '24px',
+                fontWeight: 700,
+                color: 'white',
+                textShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+                letterSpacing: '1px',
+                fontFamily: 'system-ui, -apple-system, sans-serif',
+              }}
+            >
+              {t('transition_smile')}
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
