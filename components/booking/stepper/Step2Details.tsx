@@ -8,7 +8,6 @@ import {
   Group,
   NativeSelect,
   Paper,
-  rem,
   SegmentedControl,
   Stack,
   Text,
