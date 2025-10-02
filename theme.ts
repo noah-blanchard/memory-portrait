@@ -297,7 +297,7 @@ export const theme: MantineThemeOverride = createTheme({
         radius: 'md',
         size: 'md',
       },
-      styles: (theme: MantineTheme) => ({
+     styles: (theme: MantineTheme) => ({
         input: {
           backgroundColor: theme.white,
           borderColor: theme.colors.slate[3],

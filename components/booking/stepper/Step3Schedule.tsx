@@ -68,26 +68,6 @@ export default function Step3Schedule({
                 placeholder={t('step4_date_placeholder')}
                 leftSection={<IconCalendar size={isMobile ? 18 : 16} />}
                 size={isMobile ? 'md' : 'sm'}
-                styles={{
-                  input: {
-                    fontSize: isMobile ? rem(16) : rem(14),
-                    padding: isMobile ? rem(12) : rem(10),
-                    paddingLeft: isMobile ? rem(36) : rem(32),
-                    borderRadius: rem(12),
-                    border: `2px solid ${theme.colors.slate[2]}`,
-                    transition: 'all 0.2s ease',
-                    '&:focus': {
-                      borderColor: theme.colors.ocean[4],
-                      boxShadow: `0 0 0 3px ${theme.colors.ocean[1]}`,
-                      transform: 'translateY(-1px)',
-                    },
-                  },
-                  label: {
-                    fontSize: isMobile ? rem(14) : rem(12),
-                    fontWeight: 600,
-                    marginBottom: rem(8),
-                  },
-                }}
                 {...form.getInputProps('date')}
               />
             </Paper>
@@ -111,26 +91,6 @@ export default function Step3Schedule({
                 withAsterisk
                 leftSection={<IconClock size={isMobile ? 18 : 16} />}
                 size={isMobile ? 'md' : 'sm'}
-                styles={{
-                  input: {
-                    fontSize: isMobile ? rem(16) : rem(14),
-                    padding: isMobile ? rem(12) : rem(10),
-                    paddingLeft: isMobile ? rem(36) : rem(32),
-                    borderRadius: rem(12),
-                    border: `2px solid ${theme.colors.slate[2]}`,
-                    transition: 'all 0.2s ease',
-                    '&:focus': {
-                      borderColor: theme.colors.emerald[4],
-                      boxShadow: `0 0 0 3px ${theme.colors.emerald[1]}`,
-                      transform: 'translateY(-1px)',
-                    },
-                  },
-                  label: {
-                    fontSize: isMobile ? rem(14) : rem(12),
-                    fontWeight: 600,
-                    marginBottom: rem(8),
-                  },
-                }}
                 {...form.getInputProps('time')}
               />
             </Paper>

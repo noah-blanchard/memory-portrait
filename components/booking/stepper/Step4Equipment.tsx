@@ -245,20 +245,6 @@ export default function Step4Equipment({
                     clampBehavior="strict"
                     disabled={_loading}
                     size={isMobile ? 'md' : 'sm'}
-                    styles={{
-                      input: {
-                        fontSize: isMobile ? rem(16) : rem(14),
-                        padding: isMobile ? rem(12) : rem(10),
-                        borderRadius: rem(12),
-                        border: `2px solid ${theme.colors.slate[2]}`,
-                        transition: 'all 0.2s ease',
-                        '&:focus': {
-                          borderColor: theme.colors.rose[4],
-                          boxShadow: `0 0 0 3px ${theme.colors.rose[1]}`,
-                          transform: 'translateY(-1px)',
-                        },
-                      },
-                    }}
                     {...form.getInputProps('dslrAddonPhotos')}
                   />
                 </Box>

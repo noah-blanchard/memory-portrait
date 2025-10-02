@@ -90,31 +90,6 @@ export default function Step2Details({
                 withAsterisk
                 leftSection={<IconCamera size={isMobile ? 18 : 16} />}
                 size={isMobile ? 'md' : 'sm'}
-                styles={{
-                  input: {
-                    fontSize: isMobile ? rem(16) : rem(14),
-                    padding: isMobile ? rem(12) : rem(10),
-                    paddingLeft: isMobile ? rem(36) : rem(32),
-                    borderRadius: rem(12),
-                    border: `2px solid ${theme.colors.slate[2]}`,
-                    transition: 'all 0.2s ease',
-                    color: theme.colors.dark[7],
-                    backgroundColor: '#ffffff',
-                    '&:focus': {
-                      borderColor: theme.colors.emerald[4],
-                      boxShadow: `0 0 0 3px ${theme.colors.emerald[1]}`,
-                      transform: 'translateY(-1px)',
-                    },
-                    '&:not([dataPlaceholder])': {
-                      color: theme.colors.dark[7],
-                    },
-                  },
-                  label: {
-                    fontSize: isMobile ? rem(14) : rem(12),
-                    fontWeight: 600,
-                    marginBottom: rem(8),
-                  },
-                }}
                 {...form.getInputProps('photoshootKind')}
               />
             </Paper>
@@ -165,24 +140,6 @@ export default function Step2Details({
                 ]}
                 fullWidth
                 size={isMobile ? 'md' : 'sm'}
-                radius="lg"
-                styles={{
-                  root: {
-                    background: theme.colors.slate[1],
-                    border: `2px solid ${theme.colors.slate[2]}`,
-                    borderRadius: rem(12),
-                    padding: rem(4),
-                  },
-                  control: {
-                    borderRadius: rem(8),
-                    transition: 'all 0.2s ease',
-                    '&[dataActive]': {
-                      background: `linear-gradient(135deg, ${theme.colors.ocean[6]} 0%, ${theme.colors.emerald[6]} 100%)`,
-                      boxShadow: `0 2px 8px ${theme.colors.ocean[3]}`,
-                      transform: 'scale(1.02)',
-                    },
-                  },
-                }}
                 onChange={handleLocationChange}
               />
             </Paper>

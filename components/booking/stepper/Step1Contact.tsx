@@ -7,7 +7,6 @@ import {
   Box,
   NativeSelect,
   Paper,
-  rem,
   Stack,
   Text,
   TextInput,
@@ -85,26 +84,6 @@ export default function Step1Contact({
                 withAsterisk
                 leftSection={<IconUser size={isMobile ? 18 : 16} />}
                 size={isMobile ? 'md' : 'sm'}
-                styles={{
-                  input: {
-                    fontSize: isMobile ? rem(16) : rem(14),
-                    padding: isMobile ? rem(12) : rem(10),
-                    paddingLeft: isMobile ? rem(36) : rem(32),
-                    borderRadius: rem(12),
-                    border: `2px solid ${theme.colors.slate[2]}`,
-                    transition: 'all 0.2s ease',
-                    '&:focus': {
-                      borderColor: theme.colors.ocean[4],
-                      boxShadow: `0 0 0 3px ${theme.colors.ocean[1]}`,
-                      transform: 'translateY(-1px)',
-                    },
-                  },
-                  label: {
-                    fontSize: isMobile ? rem(14) : rem(12),
-                    fontWeight: 600,
-                    marginBottom: rem(8),
-                  },
-                }}
                 {...form.getInputProps('clientName')}
               />
             </Paper>
@@ -130,31 +109,6 @@ export default function Step1Contact({
                 ]}
                 size={isMobile ? 'md' : 'sm'}
                 {...form.getInputProps('contactMethod')}
-                styles={{
-                  input: {
-                    fontSize: isMobile ? rem(16) : rem(14),
-                    padding: isMobile ? rem(12) : rem(10),
-                    paddingLeft: isMobile ? rem(36) : rem(32),
-                    borderRadius: rem(12),
-                    border: `2px solid ${theme.colors.slate[2]}`,
-                    transition: 'all 0.2s ease',
-                    color: theme.colors.dark[7],
-                    backgroundColor: '#ffffff',
-                    '&:focus': {
-                      borderColor: theme.colors.emerald[4],
-                      boxShadow: `0 0 0 3px ${theme.colors.emerald[1]}`,
-                      transform: 'translateY(-1px)',
-                    },
-                    '&:not([dataPlaceholder])': {
-                      color: theme.colors.dark[7],
-                    },
-                  },
-                  label: {
-                    fontSize: isMobile ? rem(14) : rem(12),
-                    fontWeight: 600,
-                    marginBottom: rem(8),
-                  },
-                }}
               />
             </Paper>
 
@@ -178,21 +132,6 @@ export default function Step1Contact({
                     placeholder={placeholderByMethod[form.values.contactMethod]}
                     withAsterisk
                     size={isMobile ? 'md' : 'sm'}
-                    styles={{
-                      input: {
-                        fontSize: isMobile ? rem(16) : rem(14),
-                        padding: isMobile ? rem(12) : rem(10),
-                        paddingLeft: isMobile ? rem(36) : rem(32),
-                        borderRadius: rem(12),
-                        border: `2px solid ${theme.colors.slate[2]}`,
-                        transition: 'all 0.2s ease',
-                        '&:focus': {
-                          borderColor: theme.colors.rose[4],
-                          boxShadow: `0 0 0 3px ${theme.colors.rose[1]}`,
-                          transform: 'translateY(-1px)',
-                        },
-                      },
-                    }}
                     {...form.getInputProps('contact')}
                   />
                 </Paper>
