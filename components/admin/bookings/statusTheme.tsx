@@ -1,12 +1,12 @@
-import { z } from 'zod';
 import {
-  IconHourglassHigh,
-  IconSearch,
+  IconBan,
   IconCircleCheck,
   IconCircleX,
-  IconBan,
+  IconHourglassHigh,
+  IconSearch,
   type Icon as TablerIcon,
 } from '@tabler/icons-react';
+import { z } from 'zod';
 import { BookingStatusEnum } from '@/schemas/bookingGrouped';
 
 export type BookingStatus = z.infer<typeof BookingStatusEnum>;
@@ -17,11 +17,11 @@ export type StatusMeta = {
 };
 
 export const STATUS_META: Record<BookingStatus, StatusMeta> = {
-  pending:   { label: 'status_pending',   color: 'yellow', Icon: IconHourglassHigh },
-  reviewed:  { label: 'status_reviewed',  color: 'blue',   Icon: IconSearch },
-  approved:  { label: 'status_approved',  color: 'green',  Icon: IconCircleCheck },
-  rejected:  { label: 'status_rejected',  color: 'red',    Icon: IconCircleX },
-  cancelled: { label: 'status_cancelled', color: 'gray',   Icon: IconBan },
+  pending: { label: 'status_pending', color: 'yellow', Icon: IconHourglassHigh },
+  reviewed: { label: 'status_reviewed', color: 'blue', Icon: IconSearch },
+  approved: { label: 'status_approved', color: 'green', Icon: IconCircleCheck },
+  rejected: { label: 'status_rejected', color: 'red', Icon: IconCircleX },
+  cancelled: { label: 'status_cancelled', color: 'gray', Icon: IconBan },
 };
 
 export const STATUS_ORDER: BookingStatus[] = [

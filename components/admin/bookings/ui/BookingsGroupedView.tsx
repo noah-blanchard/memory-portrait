@@ -2,9 +2,9 @@
 
 import { Stack } from '@mantine/core';
 import type { BookingGrouped } from '@/schemas/bookingGrouped';
+import { BookingRequestsRow } from '@/types/db-rows';
 import { STATUS_ORDER, type BookingStatus } from '../statusTheme';
 import BookingsGroup from './BookingsGroups';
-import { BookingRequestsRow } from '@/types/db-rows';
 
 export default function BookingsGroupedView({
   data,

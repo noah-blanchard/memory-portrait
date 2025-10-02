@@ -5,8 +5,8 @@ import '@mantine/dates/styles.css'; // ⬅️ nouveau
 
 import { ColorSchemeScript, MantineProvider } from '@mantine/core';
 import { DatesProvider } from '@mantine/dates';
-import { theme } from '@/theme';
 import { ensureI18n } from '@/lib/i18n';
+import { theme } from '@/theme';
 
 ensureI18n();
 

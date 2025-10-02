@@ -44,7 +44,9 @@ export const RATES = {
 } as const;
 
 function ceilHours(h: number): number {
-  if (!Number.isFinite(h) || h <= 0) {return 1;}
+  if (!Number.isFinite(h) || h <= 0) {
+    return 1;
+  }
   return Math.ceil(h);
 }
 function round2(n: number): number {

@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
-import { createServerClient } from '@/utils/supabase/server';
 import { Container } from '@mantine/core';
+import { createServerClient } from '@/utils/supabase/server';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;

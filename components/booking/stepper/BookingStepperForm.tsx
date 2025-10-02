@@ -1,24 +1,43 @@
 'use client';
 
 import dayjs from 'dayjs';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   IconCalendar,
-  IconInfoCircle,
-  IconMoodCheck,
-  IconMoodHappy,
-  IconMoodSmile,
-  IconTool,
+  IconCheck,
+  IconChevronLeft,
+  IconChevronRight,
   IconUser,
+  IconCamera,
+  IconSettings,
+  IconClipboardCheck,
+  IconReceipt,
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
-import { Stack, Stepper } from '@mantine/core';
+import {
+  Box,
+  Button,
+  Center,
+  Group,
+  Progress,
+  Stepper,
+  Text,
+  Transition,
+  UnstyledButton,
+  useMantineTheme,
+} from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { useMediaQuery } from '@mantine/hooks';
 import ReceiptCard, { ReceiptData } from '@/components/receipt/ReceiptCard';
 import { mantineZodResolver } from '@/lib/mantineZodResolver';
 import { bookingCreateSchema } from '@/schemas/bookingCreate';
-import { contactStepSchema, detailsStepSchema, scheduleStepSchema, equipmentStepSchema } from '@/schemas/bookingSteps';
-
+import {
+  contactStepSchema,
+  detailsStepSchema,
+  equipmentStepSchema,
+  scheduleStepSchema,
+} from '@/schemas/bookingSteps';
 import Step1Contact from './Step1Contact';
 import Step2Details from './Step2Details';
 import Step3Schedule from './Step3Schedule';
@@ -33,10 +52,17 @@ function mergeDateTime(d: Date, hhmm: string): Date {
 }
 
 export default function BookingStepperForm() {
+  const { t, i18n } = useTranslation('common');
+  const theme = useMantineTheme();
+  const isMobile = useMediaQuery('(max-width: 768px)');
   const [active, setActive] = useState(0);
   const [_serverError, setServerError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [receipt, setReceipt] = useState<ReceiptData | null>(null);
+  const [stepTransition, setStepTransition] = useState<'slide-left' | 'slide-right' | 'fade'>(
+    'fade'
+  );
+  const [currentLang, setCurrentLang] = useState<'en' | 'zh'>('en');
 
   const form = useForm({
     initialValues: {
@@ -59,27 +85,83 @@ export default function BookingStepperForm() {
     },
   });
 
+  useEffect(() => {
+    const saved =
+      (typeof window !== 'undefined' && (localStorage.getItem('lang') as 'en' | 'zh')) || null;
+    const initial = saved ?? (i18n.language?.startsWith('zh') ? 'zh' : 'en');
+    setCurrentLang(initial);
+    i18n.changeLanguage(initial);
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = initial;
+    }
+  }, [i18n]);
+
+  const switchLanguage = (lang: 'en' | 'zh') => {
+    setCurrentLang(lang);
+    i18n.changeLanguage(lang);
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = lang;
+    }
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('lang', lang);
+    }
+  };
+
   const schemaByIndex: Record<number, z.ZodTypeAny> = {
-    0: contactStepSchema,   // Step 1: Contact (name + contact)
-    1: detailsStepSchema,   // Step 2: Details (photoshoot type + location)
-    2: scheduleStepSchema,  // Step 3: Schedule (date + time + duration)
+    0: contactStepSchema, // Step 1: Contact (name + contact)
+    1: detailsStepSchema, // Step 2: Details (photoshoot type + location)
+    2: scheduleStepSchema, // Step 3: Schedule (date + time + duration)
     3: equipmentStepSchema, // Step 4: Equipment (equipment selection)
-    4: z.object({}),       // Step 5: Review - no validation needed
-    5: z.object({}),       // Step 6: Receipt - no validation needed
+    4: z.object({}), // Step 5: Review - no validation needed
+    5: z.object({}), // Step 6: Receipt - no validation needed
+  };
+
+  const translateErrors = (errors: Record<string, string>) => {
+    const translatedErrors: Record<string, string> = {};
+    for (const [key, message] of Object.entries(errors)) {
+      if (message.startsWith('validation_')) {
+        translatedErrors[key] = t(message);
+      } else {
+        translatedErrors[key] = message;
+      }
+    }
+    return translatedErrors;
   };
 
   const validateStep = (i: number) => {
     const errs = mantineZodResolver(schemaByIndex[i])(form.values);
-    form.setErrors(errs);
-    return Object.keys(errs).length === 0;
+    const translatedErrs = translateErrors(errs);
+    form.setErrors(translatedErrs);
+    return Object.keys(translatedErrs).length === 0;
   };
 
   const next = () => {
     if (validateStep(active)) {
+      setStepTransition('slide-left');
       setActive((s) => Math.min(s + 1, 6));
     }
   };
-  const back = () => setActive((s) => Math.max(s - 1, 0));
+
+  const back = () => {
+    setStepTransition('slide-right');
+    setActive((s) => Math.max(s - 1, 0));
+  };
+
+  const goToStep = (step: number) => {
+    if (step < active) {
+      setStepTransition('slide-right');
+    } else if (step > active) {
+      setStepTransition('slide-left');
+    } else {
+      setStepTransition('fade');
+    }
+    setActive(step);
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => setStepTransition('fade'), 300);
+    return () => clearTimeout(timer);
+  }, [active]);
 
   const handleSubmit = async () => {
     if (!validateStep(3)) {
@@ -107,9 +189,10 @@ export default function BookingStepperForm() {
       equipIphone13: !!form.values.equipIphone13,
       equipNikonDslr: !!form.values.equipNikonDslr,
 
-      extraEdits: form.values.extraEdits === 0 || form.values.extraEdits == null
+      extraEdits:
+        form.values.extraEdits === 0 || form.values.extraEdits == null
         ? null
-        : Number(form.values.extraEdits),
+        : Number(form.values.extraEdits), 
 
       dslrAddonPhotos:
         form.values.dslrAddonPhotos === 0 || form.values.dslrAddonPhotos == null
@@ -182,36 +265,240 @@ export default function BookingStepperForm() {
     setActive(0);
   };
 
+  const stepIcons = [
+    <IconUser size={20} />,
+    <IconCamera size={20} />,
+    <IconCalendar size={20} />,
+    <IconSettings size={20} />,
+    <IconClipboardCheck size={20} />,
+    <IconReceipt size={20} />,
+  ];
+
+  const progress = ((active + 1) / 6) * 100;
+
   return (
-    <Stack gap="lg">
-      <Stepper active={active} onStepClick={setActive} allowNextStepsSelect={false}>
-        <Stepper.Step icon={<IconUser size={18} />} completedIcon={<IconMoodSmile size={18} />}>
-          <Step1Contact form={form} onNext={next} />
-        </Stepper.Step>
+    <Box
+      style={{
+        width: '100%',
+        height: '100vh',
+        padding: isMobile ? '1rem' : '2rem',
+        background: '#fff',
+        borderRadius: isMobile ? '1rem' : '0',
+        border: isMobile ? `1px solid ${theme.colors.slate[2]}` : 'none',
+        boxShadow: isMobile ? '0 8px 24px rgba(0,0,0,0.06)' : 'none',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      {/* Mobile Progress Header */}
+      {isMobile && (
+        <Box mb="lg">
+          <Group justify="space-between" mb="xs">
+            <Text size="sm" fw={600} c="dimmed">
+              {t('step')} {active + 1} {t('of')} 6
+            </Text>
+            <Text size="sm" fw={600} c="ocean">
+              {Math.round(progress)}%
+            </Text>
+          </Group>
+          <Progress
+            value={progress}
+            size="sm"
+            radius="xl"
+            color="ocean"
+            style={{
+              transition: 'all 0.3s ease',
+              boxShadow: `0 2px 8px ${theme.colors.ocean[2]}`,
+            }}
+          />
+        </Box>
+      )}
 
-        <Stepper.Step
-          icon={<IconInfoCircle size={18} />}
-          completedIcon={<IconMoodHappy size={18} />}
+      {/* Desktop Stepper */}
+      {!isMobile && (
+        <Stepper
+          active={active}
+          onStepClick={goToStep}
+          allowNextStepsSelect={false}
+          size="lg"
+          radius="xl"
+          mb="xl"
+          styles={{
+            root: {
+              '& .mantineStepperStep': {
+                transition: 'all 0.3s ease',
+              },
+              '& .mantineStepperStep[dataProgress]': {
+                transform: 'scale(1.1)',
+                boxShadow: `0 4px 12px ${theme.colors.ocean[3]}`,
+              },
+              '& .mantineStepperStep[dataCompleted]': {
+                transform: 'scale(1.05)',
+              },
+            },
+            stepIcon: {
+              border: `2px solid ${theme.colors.slate[3]}`,
+              backgroundColor: '#ffffff',
+              color: theme.colors.slate[6],
+              '&[dataProgress]': {
+                borderColor: theme.colors.ocean[6],
+                backgroundColor: theme.colors.ocean[1],
+                color: theme.colors.ocean[7],
+              },
+              '&[dataCompleted]': {
+                borderColor: theme.colors.emerald[6],
+                backgroundColor: theme.colors.emerald[1],
+                color: theme.colors.emerald[7],
+              },
+            },
+            separator: {
+              backgroundColor: theme.colors.slate[3],
+              '&[dataActive]': {
+                backgroundColor: theme.colors.ocean[4],
+              },
+            },
+          }}
         >
-          <Step2Details form={form} onBack={back} onNext={next} />
-        </Stepper.Step>
+          {stepIcons.map((icon, index) => (
+            <Stepper.Step
+              key={index}
+              icon={icon}
+              completedIcon={<IconCheck size={16} />}
+            />
+          ))}
+        </Stepper>
+      )}
 
-        <Stepper.Step icon={<IconCalendar size={18} />} completedIcon={<IconMoodCheck size={18} />}>
-          <Step3Schedule loading={loading} form={form} onBack={back} onNext={next} />
-        </Stepper.Step>
+      {/* Main Content Area */}
+      <Box style={{ flex: 1, overflow: 'auto' }}>
+        {/* Step Content with Animations */}
+        <Box style={{ minHeight: isMobile ? '50vh' : 'auto' }}>
+        <Transition
+          mounted
+          transition={
+            stepTransition === 'slide-left'
+              ? 'slide-left'
+              : stepTransition === 'slide-right'
+                ? 'slide-right'
+                : 'fade'
+          }
+          duration={300}
+          timingFunction="ease-in-out"
+        >
+          {(styles) => (
+            <Box style={styles}>
+              {active === 0 && <Step1Contact form={form} onNext={next} />}
+              {active === 1 && <Step2Details form={form} onBack={back} onNext={next} />}
+              {active === 2 && (
+                <Step3Schedule loading={loading} form={form} onBack={back} onNext={next} />
+              )}
+              {active === 3 && (
+                <Step4Equipment loading={loading} form={form} onBack={back} onNext={next} />
+              )}
+              {active === 4 && (
+                <Step5Review loading={loading} form={form} onBack={back} onNext={handleSubmit} />
+              )}
+              {active === 5 && <ReceiptCard data={receipt} onNew={restart} />}
+            </Box>
+          )}
+        </Transition>
+        </Box>
+      </Box>
 
-        <Stepper.Step icon={<IconTool size={18} />} completedIcon={<IconTool size={18} />}>
-          <Step4Equipment loading={loading} form={form} onBack={back} onNext={next} />
-        </Stepper.Step>
+      {/* Navigation Buttons */}
+      {active < 5 && (
+        <Group
+          justify="space-between"
+          p="md"
+          style={{ 
+            borderTop: `1px solid ${theme.colors.slate[2]}`,
+            backgroundColor: '#fff',
+          }}
+        >
+          <Button
+            variant="light"
+            size="md"
+            onClick={back}
+            disabled={active === 0}
+            leftSection={<IconChevronLeft size={16} />}
+            style={{
+              transition: 'all 0.2s ease',
+              transform: active === 0 ? 'scale(0.95)' : 'scale(1)',
+              opacity: active === 0 ? 0.5 : 1,
+            }}
+          >
+            {t('common_back')}
+          </Button>
 
-        <Stepper.Step icon={<IconCalendar size={18} />} completedIcon={<IconMoodCheck size={18} />}>
-          <Step5Review loading={loading} form={form} onBack={back} onNext={handleSubmit} />
-        </Stepper.Step>
+          <Button
+            size="md"
+            onClick={active === 4 ? handleSubmit : next}
+            loading={loading}
+            rightSection={active < 4 ? <IconChevronRight size={16} /> : <IconCheck size={16} />}
+            style={{
+              transition: 'all 0.2s ease',
+              background: `linear-gradient(135deg, ${theme.colors.ocean[6]} 0%, ${theme.colors.emerald[6]} 100%)`,
+              boxShadow: `0 4px 12px ${theme.colors.ocean[3]}`,
+            }}
+          >
+            {active === 4 ? t('step4_review_confirm') : t('common_next')}
+          </Button>
+        </Group>
+      )}
 
-        <Stepper.Completed>
-          <ReceiptCard data={receipt} onNew={restart} />
-        </Stepper.Completed>
-      </Stepper>
-    </Stack>
+      {/* Language Switcher */}
+      <Box
+        style={{
+          paddingTop: '1rem',
+          borderTop: `1px solid ${theme.colors.slate[2]}`,
+        }}
+      >
+        <Center>
+          <Group gap="xs">
+            <Text size="xs" c="dimmed">
+              Language:
+            </Text>
+            <Group gap={4}>
+              <UnstyledButton
+                onClick={() => switchLanguage('en')}
+                style={{
+                  padding: '4px 12px',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  backgroundColor:
+                    currentLang === 'en'
+                      ? 'var(--mantine-color-ocean-5)'
+                      : 'var(--mantine-color-gray-1)',
+                  color: currentLang === 'en' ? '#fff' : 'var(--mantine-color-gray-7)',
+                  transition: 'all 0.2s ease',
+                  cursor: 'pointer',
+                }}
+              >
+                EN
+              </UnstyledButton>
+              <UnstyledButton
+                onClick={() => switchLanguage('zh')}
+                style={{
+                  padding: '4px 12px',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  backgroundColor:
+                    currentLang === 'zh'
+                      ? 'var(--mantine-color-ocean-5)'
+                      : 'var(--mantine-color-gray-1)',
+                  color: currentLang === 'zh' ? '#fff' : 'var(--mantine-color-gray-7)',
+                  transition: 'all 0.2s ease',
+                  cursor: 'pointer',
+                }}
+              >
+                中文
+              </UnstyledButton>
+            </Group>
+          </Group>
+        </Center>
+      </Box>
+    </Box>
   );
 }

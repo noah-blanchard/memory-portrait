@@ -60,50 +60,48 @@ export const theme: MantineThemeOverride = createTheme({
 
   primaryColor: 'ocean',
   primaryShade: 5,
-  
+
   fontFamily:
     '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-  
-  fontFamilyMonospace:
-    '"JetBrains Mono", "Fira Code", Consolas, Monaco, "Courier New", monospace',
+
+  fontFamilyMonospace: '"JetBrains Mono", "Fira Code", Consolas, Monaco, "Courier New", monospace',
 
   defaultRadius: 'md',
   cursorType: 'pointer',
   respectReducedMotion: true,
 
   headings: {
-    fontFamily:
-      '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     fontWeight: '700',
     sizes: {
-      h1: { 
-        fontSize: rem(32), 
-        fontWeight: '800', 
+      h1: {
+        fontSize: rem(32),
+        fontWeight: '800',
         lineHeight: '1.2',
       },
-      h2: { 
-        fontSize: rem(24), 
-        fontWeight: '700', 
+      h2: {
+        fontSize: rem(24),
+        fontWeight: '700',
         lineHeight: '1.3',
       },
-      h3: { 
-        fontSize: rem(20), 
-        fontWeight: '600', 
+      h3: {
+        fontSize: rem(20),
+        fontWeight: '600',
         lineHeight: '1.4',
       },
-      h4: { 
-        fontSize: rem(18), 
-        fontWeight: '600', 
+      h4: {
+        fontSize: rem(18),
+        fontWeight: '600',
         lineHeight: '1.45',
       },
-      h5: { 
-        fontSize: rem(16), 
-        fontWeight: '600', 
+      h5: {
+        fontSize: rem(16),
+        fontWeight: '600',
         lineHeight: '1.5',
       },
-      h6: { 
-        fontSize: rem(14), 
-        fontWeight: '600', 
+      h6: {
+        fontSize: rem(14),
+        fontWeight: '600',
         lineHeight: '1.5',
       },
     },
@@ -144,22 +142,19 @@ export const theme: MantineThemeOverride = createTheme({
           fontWeight: 600,
           letterSpacing: '0.01em',
           transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
-          boxShadow: params.variant === 'filled' 
-            ? '0 1px 2px 0 rgba(0, 0, 0, 0.05)' 
-            : 'none',
-          
+          boxShadow: params.variant === 'filled' ? '0 1px 2px 0 rgba(0, 0, 0, 0.05)' : 'none',
+
           '&:hover': {
             transform: 'translateY(-1px)',
-            boxShadow: params.variant === 'filled'
-              ? '0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04)'
-              : 'none',
+            boxShadow:
+              params.variant === 'filled'
+                ? '0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04)'
+                : 'none',
           },
-          
+
           '&:active': {
             transform: 'translateY(0)',
-            boxShadow: params.variant === 'filled'
-              ? '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
-              : 'none',
+            boxShadow: params.variant === 'filled' ? '0 1px 2px 0 rgba(0, 0, 0, 0.05)' : 'none',
           },
 
           '&:disabled, &[dataDisabled="true"]': {
@@ -171,8 +166,8 @@ export const theme: MantineThemeOverride = createTheme({
     },
 
     Badge: {
-      defaultProps: { 
-        radius: 'md', 
+      defaultProps: {
+        radius: 'md',
         variant: 'light',
       },
       styles: () => ({
@@ -185,9 +180,9 @@ export const theme: MantineThemeOverride = createTheme({
     },
 
     Card: {
-      defaultProps: { 
-        radius: 'lg', 
-        padding: 'lg', 
+      defaultProps: {
+        radius: 'lg',
+        padding: 'lg',
         withBorder: true,
       },
       styles: (theme: MantineTheme) => ({
@@ -195,7 +190,7 @@ export const theme: MantineThemeOverride = createTheme({
           backgroundColor: theme.white,
           borderColor: theme.colors.slate[2],
           transition: 'box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1)',
-          
+
           '&:hover': {
             boxShadow: theme.shadows.sm,
           },
@@ -204,8 +199,8 @@ export const theme: MantineThemeOverride = createTheme({
     },
 
     TextInput: {
-      defaultProps: { 
-        radius: 'md', 
+      defaultProps: {
+        radius: 'md',
         size: 'md',
       },
       styles: (theme: MantineTheme) => ({
@@ -214,25 +209,25 @@ export const theme: MantineThemeOverride = createTheme({
           borderColor: theme.colors.slate[3],
           fontWeight: 500,
           transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
-          
+
           '&::placeholder': {
             color: theme.colors.slate[4],
           },
-          
+
           '&:focus': {
             borderColor: theme.colors.ocean[5],
             boxShadow: `0 0 0 3px ${theme.colors.ocean[0]}`,
           },
-          
+
           '&[dataInvalid="true"]': {
             borderColor: theme.colors.rose[5],
-            
+
             '&:focus': {
               boxShadow: `0 0 0 3px ${theme.colors.rose[1]}`,
             },
           },
         },
-        label: { 
+        label: {
           fontWeight: 600,
           fontSize: rem(14),
           marginBottom: rem(6),
@@ -246,8 +241,8 @@ export const theme: MantineThemeOverride = createTheme({
     },
 
     NumberInput: {
-      defaultProps: { 
-        radius: 'md', 
+      defaultProps: {
+        radius: 'md',
         size: 'md',
       },
       styles: (theme: MantineTheme) => ({
@@ -256,13 +251,13 @@ export const theme: MantineThemeOverride = createTheme({
           borderColor: theme.colors.slate[3],
           fontWeight: 500,
           transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
-          
+
           '&:focus': {
             borderColor: theme.colors.ocean[5],
             boxShadow: `0 0 0 3px ${theme.colors.ocean[0]}`,
           },
         },
-        label: { 
+        label: {
           fontWeight: 600,
           fontSize: rem(14),
           marginBottom: rem(6),
@@ -272,8 +267,8 @@ export const theme: MantineThemeOverride = createTheme({
     },
 
     PasswordInput: {
-      defaultProps: { 
-        radius: 'md', 
+      defaultProps: {
+        radius: 'md',
         size: 'md',
       },
       styles: (theme: MantineTheme) => ({
@@ -282,13 +277,13 @@ export const theme: MantineThemeOverride = createTheme({
           borderColor: theme.colors.slate[3],
           fontWeight: 500,
           transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
-          
+
           '&:focus': {
             borderColor: theme.colors.ocean[5],
             boxShadow: `0 0 0 3px ${theme.colors.ocean[0]}`,
           },
         },
-        label: { 
+        label: {
           fontWeight: 600,
           fontSize: rem(14),
           marginBottom: rem(6),
@@ -298,8 +293,8 @@ export const theme: MantineThemeOverride = createTheme({
     },
 
     NativeSelect: {
-      defaultProps: { 
-        radius: 'md', 
+      defaultProps: {
+        radius: 'md',
         size: 'md',
       },
       styles: (theme: MantineTheme) => ({
@@ -307,14 +302,19 @@ export const theme: MantineThemeOverride = createTheme({
           backgroundColor: theme.white,
           borderColor: theme.colors.slate[3],
           fontWeight: 500,
+          color: theme.colors.dark[7],
           transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
-          
+
           '&:focus': {
             borderColor: theme.colors.ocean[5],
             boxShadow: `0 0 0 3px ${theme.colors.ocean[0]}`,
           },
+
+          '&:not([dataPlaceholder])': {
+            color: theme.colors.dark[7],
+          },
         },
-        label: { 
+        label: {
           fontWeight: 600,
           fontSize: rem(14),
           marginBottom: rem(6),
@@ -334,13 +334,13 @@ export const theme: MantineThemeOverride = createTheme({
           borderColor: theme.colors.slate[3],
           fontWeight: 500,
           transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
-          
+
           '&:focus': {
             borderColor: theme.colors.ocean[5],
             boxShadow: `0 0 0 3px ${theme.colors.ocean[0]}`,
           },
         },
-        label: { 
+        label: {
           fontWeight: 600,
           fontSize: rem(14),
           marginBottom: rem(6),
@@ -357,9 +357,9 @@ export const theme: MantineThemeOverride = createTheme({
     },
 
     Textarea: {
-      defaultProps: { 
-        radius: 'md', 
-        autosize: true, 
+      defaultProps: {
+        radius: 'md',
+        autosize: true,
         minRows: 3,
       },
       styles: (theme: MantineTheme) => ({
@@ -368,17 +368,17 @@ export const theme: MantineThemeOverride = createTheme({
           borderColor: theme.colors.slate[3],
           fontWeight: 500,
           transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
-          
+
           '&::placeholder': {
             color: theme.colors.slate[4],
           },
-          
+
           '&:focus': {
             borderColor: theme.colors.ocean[5],
             boxShadow: `0 0 0 3px ${theme.colors.ocean[0]}`,
           },
         },
-        label: { 
+        label: {
           fontWeight: 600,
           fontSize: rem(14),
           marginBottom: rem(6),
@@ -388,8 +388,8 @@ export const theme: MantineThemeOverride = createTheme({
     },
 
     Select: {
-      defaultProps: { 
-        radius: 'md', 
+      defaultProps: {
+        radius: 'md',
         checkIconPosition: 'right',
       },
       styles: (theme: MantineTheme) => ({
@@ -398,13 +398,13 @@ export const theme: MantineThemeOverride = createTheme({
           borderColor: theme.colors.slate[3],
           fontWeight: 500,
           transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
-          
+
           '&:focus': {
             borderColor: theme.colors.ocean[5],
             boxShadow: `0 0 0 3px ${theme.colors.ocean[0]}`,
           },
         },
-        label: { 
+        label: {
           fontWeight: 600,
           fontSize: rem(14),
           marginBottom: rem(6),
@@ -439,25 +439,25 @@ export const theme: MantineThemeOverride = createTheme({
     },
 
     Checkbox: {
-      defaultProps: { 
+      defaultProps: {
         radius: 'sm',
       },
       styles: (theme: MantineTheme) => ({
         input: {
           borderColor: theme.colors.slate[3],
           transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)',
-          
+
           '&:checked': {
             borderColor: theme.colors.ocean[5],
             backgroundColor: theme.colors.ocean[5],
           },
-          
+
           '&:focus-visible': {
             outline: `2px solid ${theme.colors.ocean[5]}`,
             outlineOffset: rem(2),
           },
         },
-        label: { 
+        label: {
           fontWeight: 500,
           fontSize: rem(14),
           color: theme.colors.slate[7],
@@ -466,7 +466,7 @@ export const theme: MantineThemeOverride = createTheme({
     },
 
     Switch: {
-      defaultProps: { 
+      defaultProps: {
         size: 'md',
       },
       styles: (theme: MantineTheme) => ({
@@ -474,7 +474,7 @@ export const theme: MantineThemeOverride = createTheme({
           cursor: 'pointer',
           transition: 'background-color 150ms cubic-bezier(0.4, 0, 0.2, 1)',
         },
-        label: { 
+        label: {
           fontWeight: 500,
           fontSize: rem(14),
           color: theme.colors.slate[7],
@@ -483,8 +483,8 @@ export const theme: MantineThemeOverride = createTheme({
     },
 
     InputLabel: {
-      defaultProps: { 
-        fw: 600, 
+      defaultProps: {
+        fw: 600,
         size: 'sm',
       },
       styles: (theme: MantineTheme) => ({
@@ -496,20 +496,20 @@ export const theme: MantineThemeOverride = createTheme({
     },
 
     Modal: {
-      defaultProps: { 
-        radius: 'lg', 
-        centered: true, 
-        overlayProps: { 
+      defaultProps: {
+        radius: 'lg',
+        centered: true,
+        overlayProps: {
           blur: 6,
           opacity: 0.55,
         },
       },
       styles: (theme: MantineTheme) => ({
-        header: { 
+        header: {
           borderBottom: `1px solid ${theme.colors.slate[2]}`,
           paddingBottom: theme.spacing.md,
         },
-        body: { 
+        body: {
           paddingTop: theme.spacing.lg,
         },
         title: {
@@ -538,7 +538,7 @@ export const theme: MantineThemeOverride = createTheme({
     },
 
     Notification: {
-      defaultProps: { 
+      defaultProps: {
         radius: 'lg',
       },
       styles: (theme: MantineTheme) => ({
@@ -557,14 +557,14 @@ export const theme: MantineThemeOverride = createTheme({
     },
 
     Loader: {
-      defaultProps: { 
+      defaultProps: {
         type: 'dots',
       },
     },
 
     Tooltip: {
-      defaultProps: { 
-        radius: 'md', 
+      defaultProps: {
+        radius: 'md',
         withArrow: true,
       },
       styles: () => ({
@@ -603,7 +603,7 @@ export const theme: MantineThemeOverride = createTheme({
   },
 
   focusRing: 'auto',
-  
+
   defaultGradient: {
     from: 'ocean.5',
     to: 'ocean.7',

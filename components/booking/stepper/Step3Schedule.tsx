@@ -1,18 +1,19 @@
 'use client';
 
-import { Group, Stack } from '@mantine/core';
-import { Button } from '@/components/I18nUI/I18nUI';
+import { useEffect, useState } from 'react';
+import { IconCalendar, IconClock, IconSparkles } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
+import { Box, Group, Paper, rem, Stack, Text, Transition, useMantineTheme } from '@mantine/core';
 import { DatePickerInput, TimePicker } from '@mantine/dates';
 import type { UseFormReturnType } from '@mantine/form';
+import { useMediaQuery } from '@mantine/hooks';
 import ButtonNumberInput from '@/components/number/NumberInput';
-import { useTranslation } from 'react-i18next';
-
 
 export default function Step3Schedule({
   form,
-  onBack,
-  onNext,
-  loading,
+  onBack: _onBack,
+  onNext: _onNext,
+  loading: _loading,
 }: {
   form: UseFormReturnType<any>;
   onBack: () => void;
@@ -20,53 +21,183 @@ export default function Step3Schedule({
   loading: boolean;
 }) {
   const { t } = useTranslation('common');
-  
+  const theme = useMantineTheme();
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isQuebecCity = form.values.location === 'Quebec City';
+  const minDuration = isQuebecCity ? 4 : 1;
+
   return (
-    <Stack gap="md">
-      <DatePickerInput
-        disabled={loading}
-        label={t('step4_date')}
-        withAsterisk
-        minDate={new Date()}
-        valueFormat="YYYY-MM-DD"
-        dropdownType="modal"
-        {...form.getInputProps('date')}
-      />
+    <Transition mounted={mounted} transition="fade" duration={400}>
+      {(styles) => (
+        <Box style={styles}>
+          <Stack gap={isMobile ? 'lg' : 'md'}>
+            {/* Step Header */}
+            <Box ta="center" mb="xs">
+              <Text size={isMobile ? 'sm' : 'md'} fw={600} c="dimmed">
+                {t('step3_schedule_title')}
+              </Text>
+              <Text size="xs" c="dimmed" mt={2}>
+                {t('step4_start_time')} & {t('step4_duration')}
+              </Text>
+            </Box>
 
-      <TimePicker
-        disabled={loading}
-        label={t('step4_start_time')}
-        minutesStep={15}
-        withDropdown
-        withAsterisk
-        {...form.getInputProps('time')}
-      />
+            {/* Date Selection */}
+            <Paper
+              p={isMobile ? 'md' : 'sm'}
+              radius="lg"
+              withBorder
+              style={{
+                background: `linear-gradient(135deg, ${theme.colors.slate[0]} 0%, ${theme.colors.ocean[0]} 100%)`,
+                border: `1px solid ${theme.colors.slate[2]}`,
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <DatePickerInput
+                disabled={_loading}
+                label={t('step4_date')}
+                withAsterisk
+                minDate={new Date()}
+                valueFormat="YYYY-MM-DD"
+                dropdownType={isMobile ? 'modal' : 'popover'}
+                placeholder={t('step4_date_placeholder')}
+                leftSection={<IconCalendar size={isMobile ? 18 : 16} />}
+                size={isMobile ? 'md' : 'sm'}
+                styles={{
+                  input: {
+                    fontSize: isMobile ? rem(16) : rem(14),
+                    padding: isMobile ? rem(12) : rem(10),
+                    paddingLeft: isMobile ? rem(36) : rem(32),
+                    borderRadius: rem(12),
+                    border: `2px solid ${theme.colors.slate[2]}`,
+                    transition: 'all 0.2s ease',
+                    '&:focus': {
+                      borderColor: theme.colors.ocean[4],
+                      boxShadow: `0 0 0 3px ${theme.colors.ocean[1]}`,
+                      transform: 'translateY(-1px)',
+                    },
+                  },
+                  label: {
+                    fontSize: isMobile ? rem(14) : rem(12),
+                    fontWeight: 600,
+                    marginBottom: rem(8),
+                  },
+                }}
+                {...form.getInputProps('date')}
+              />
+            </Paper>
 
-      <ButtonNumberInput
-        min={form.values.location === 'Quebec City' ? 4 : 1}
-        disabled={loading}
-        label={t('step4_duration')}
-        value={form.values.durationHours}
-        {...form.getInputProps('durationHours')}
-      />
+            {/* Time Selection */}
+            <Paper
+              p={isMobile ? 'md' : 'sm'}
+              radius="lg"
+              withBorder
+              style={{
+                background: `linear-gradient(135deg, ${theme.colors.slate[0]} 0%, ${theme.colors.emerald[0]} 100%)`,
+                border: `1px solid ${theme.colors.slate[2]}`,
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <TimePicker
+                disabled={_loading}
+                label={t('step4_start_time')}
+                minutesStep={15}
+                withDropdown
+                withAsterisk
+                leftSection={<IconClock size={isMobile ? 18 : 16} />}
+                size={isMobile ? 'md' : 'sm'}
+                styles={{
+                  input: {
+                    fontSize: isMobile ? rem(16) : rem(14),
+                    padding: isMobile ? rem(12) : rem(10),
+                    paddingLeft: isMobile ? rem(36) : rem(32),
+                    borderRadius: rem(12),
+                    border: `2px solid ${theme.colors.slate[2]}`,
+                    transition: 'all 0.2s ease',
+                    '&:focus': {
+                      borderColor: theme.colors.emerald[4],
+                      boxShadow: `0 0 0 3px ${theme.colors.emerald[1]}`,
+                      transform: 'translateY(-1px)',
+                    },
+                  },
+                  label: {
+                    fontSize: isMobile ? rem(14) : rem(12),
+                    fontWeight: 600,
+                    marginBottom: rem(8),
+                  },
+                }}
+                {...form.getInputProps('time')}
+              />
+            </Paper>
 
-      <ButtonNumberInput
-        label={t('step4_extra_edits')}
-        description={t('step4_edits_included')}
-        min={0}
-        step={1}
-        {...form.getInputProps('extraEdits')}
-        required={false}
-      />
+            {/* Duration */}
+            <Paper
+              p={isMobile ? 'md' : 'sm'}
+              radius="lg"
+              withBorder
+              style={{
+                background: `linear-gradient(135deg, ${theme.colors.slate[0]} 0%, ${theme.colors.rose[0]} 100%)`,
+                border: `1px solid ${theme.colors.slate[2]}`,
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <ButtonNumberInput
+                min={minDuration}
+                disabled={_loading}
+                label={t('step4_duration')}
+                value={form.values.durationHours}
+                {...form.getInputProps('durationHours')}
+              />
 
-      <Group justify="space-between" mt="md">
-        <Button disabled={loading} variant="default" onClick={onBack}>
-          common_back
-        </Button>
-        <Button loading={loading} onClick={onNext}>
-          common_next_short
-        </Button>
-      </Group>
-    </Stack>
+              {/* Duration info */}
+              {isQuebecCity && (
+                <Box
+                  mt="sm"
+                  p="sm"
+                  style={{
+                    background: `linear-gradient(135deg, ${theme.colors.emerald[1]} 0%, ${theme.colors.ocean[1]} 100%)`,
+                    borderRadius: rem(8),
+                    border: `1px solid ${theme.colors.emerald[2]}`,
+                  }}
+                >
+                  <Group gap="xs" mb="xs">
+                    <IconSparkles size={16} color={theme.colors.emerald[6]} />
+                    <Text size="xs" fw={600} c="emerald">
+                      {t('step3_required_qc')}
+                    </Text>
+                  </Group>
+                </Box>
+              )}
+            </Paper>
+
+            {/* Extra Edits */}
+            <Paper
+              p={isMobile ? 'md' : 'sm'}
+              radius="lg"
+              withBorder
+              style={{
+                background: `linear-gradient(135deg, ${theme.colors.slate[0]} 0%, ${theme.colors.emerald[0]} 100%)`,
+                border: `1px solid ${theme.colors.slate[2]}`,
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <ButtonNumberInput
+                label={t('step4_extra_edits')}
+                description={t('step4_edits_included')}
+                min={0}
+                step={1}
+                {...form.getInputProps('extraEdits')}
+                required={false}
+              />
+            </Paper>
+          </Stack>
+        </Box>
+      )}
+    </Transition>
   );
 }

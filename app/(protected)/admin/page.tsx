@@ -14,7 +14,7 @@ export default async function AdminPage() {
     <div>
       <h1>Admin Page</h1>
       <p>This is the admin page content.</p>
-      <a href='admin-bookings'>See bookings</a>
+      <a href="admin-bookings">See bookings</a>
 
       <form action={logout}>
         <Button type="submit" formAction={logout}>

@@ -2,20 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  Center,
-  Container,
-  Group,
-  Paper,
-  PasswordInput,
-  Stack,
-  TextInput,
-} from '@mantine/core';
-import { Alert, Button, Text, Title } from '@/components/I18nUI/I18nUI';
-import { useForm } from '@mantine/form';
 import { IconAlertCircle } from '@tabler/icons-react';
-import { createClient } from '@/utils/supabase/client';
 import { useTranslation } from 'react-i18next';
+import { Center, Container, Group, Paper, PasswordInput, Stack, TextInput } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { Alert, Button, Text, Title } from '@/components/I18nUI/I18nUI';
+import { createClient } from '@/utils/supabase/client';
 
 export default function AdminLogin() {
   const { t } = useTranslation('common');

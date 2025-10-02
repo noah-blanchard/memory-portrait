@@ -2,6 +2,7 @@
 
 import { useRef } from 'react';
 import { IconMinus, IconPlus } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import {
   ActionIcon,
   Group,
@@ -25,6 +26,7 @@ export default function ButtonNumberInput({
   size = 'lg',
   ...props
 }: Props) {
+  const { t } = useTranslation('common');
   const handlersRef = useRef<NumberInputHandlers>(null);
 
   const circleStyle = {
@@ -46,7 +48,7 @@ export default function ButtonNumberInput({
           variant="default"
           disabled={value === min}
           onClick={() => props?.onChange?.(Number(value) - 1)}
-          aria-label="Decrement"
+          aria-label={t('receipt_decrement')}
           size="xl"
         >
           <IconMinus size={20} />
@@ -68,7 +70,7 @@ export default function ButtonNumberInput({
           variant="default"
           disabled={value === max}
           onClick={() => props?.onChange?.(Number(value) + 1)}
-          aria-label="Increment"
+          aria-label={t('receipt_increment')}
           size="xl"
         >
           <IconPlus size={20} />

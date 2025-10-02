@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { bookingCreateSchema, type BookingCreateInput } from './bookingCreate';
 import { ContactMethodEnum, PhotoshootTypeEnum } from './enums';
 
-
 const normalizeWhitespace = (s: string) => s.replace(/\s+/g, ' ').trim();
 const stripPhone = (s: string) => s.replace(/[^\d+]/g, '');
 function validateContactForMethod(
@@ -14,7 +13,7 @@ function validateContactForMethod(
   switch (method) {
     case 'email': {
       if (!z.string().email().safeParse(contact).success) {
-        ctx.addIssue({ code: 'custom', path, message: 'Invalid email' });
+        ctx.addIssue({ code: 'custom', path, message: 'validation_email_invalid' });
       }
       break;
     }
@@ -24,7 +23,7 @@ function validateContactForMethod(
         ctx.addIssue({
           code: 'custom',
           path,
-          message: 'Invalid WeChat ID (6–20 chars, start with a letter, letters/digits/_/-)',
+          message: 'validation_wechat_invalid',
         });
       }
       break;
@@ -35,7 +34,7 @@ function validateContactForMethod(
         ctx.addIssue({
           code: 'custom',
           path,
-          message: 'Invalid Instagram handle (letters/numbers . _ , 1–30 chars)',
+          message: 'validation_instagram_invalid',
         });
       }
       break;
@@ -47,7 +46,7 @@ function validateContactForMethod(
         ctx.addIssue({
           code: 'custom',
           path,
-          message: 'Invalid phone (use international format, e.g. +15551234567)',
+          message: 'validation_phone_invalid',
         });
       }
       break;
@@ -57,9 +56,17 @@ function validateContactForMethod(
 
 export const contactStepSchema = z
   .object({
-    clientName: z.string().min(1).max(120).transform(normalizeWhitespace),
+    clientName: z
+      .string()
+      .min(1, 'validation_name_required')
+      .max(120)
+      .transform(normalizeWhitespace),
     contactMethod: ContactMethodEnum,
-    contact: z.string().min(1, 'Contact is required').max(120).transform(normalizeWhitespace),
+    contact: z
+      .string()
+      .min(1, 'validation_contact_required')
+      .max(120)
+      .transform(normalizeWhitespace),
   })
   .superRefine((val, ctx) => {
     validateContactForMethod(val.contactMethod, val.contact, ctx);
@@ -67,18 +74,49 @@ export const contactStepSchema = z
 
 export const detailsStepSchema = z.object({
   photoshootKind: PhotoshootTypeEnum,
-  location: z
-    .string()
-    .min(2, 'Please enter a city in Quebec')
-    .max(200)
-    .transform(normalizeWhitespace),
+  location: z.string().min(2, 'validation_city_required').max(200).transform(normalizeWhitespace),
 });
 
 export const scheduleStepSchema = z.object({
-  date: z.coerce.date(),
-  time: z.string().regex(/^\d{2}:\d{2}$/, 'Pick a time (HH:mm)'),
-  durationHours: z.number().int().min(1),
-  extraEdits: z.number().min(0).optional(),
+  date: z.coerce
+    .date()
+    .refine(
+      (date) => {
+        return !isNaN(date.getTime());
+      },
+      {
+        message: 'validation_date_invalid',
+      }
+    )
+    .refine(
+      (date) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return date >= today;
+      },
+      {
+        message: 'validation_date_past',
+      }
+    ),
+  time: z
+    .string()
+    .min(1, 'validation_time_required')
+    .regex(/^\d{2}:\d{2}$/, 'validation_time_invalid')
+    .refine(
+      (time) => {
+        const [hours, minutes] = time.split(':').map(Number);
+        return hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59;
+      },
+      {
+        message: 'validation_time_invalid',
+      }
+    ),
+  durationHours: z
+    .number()
+    .int()
+    .min(1, 'validation_duration_min')
+    .max(12, 'validation_duration_max'),
+  extraEdits: z.number().min(0, 'validation_edits_min').max(50, 'validation_edits_max').optional(),
 });
 
 export const equipmentStepSchema = z
@@ -97,7 +135,7 @@ export const equipmentStepSchema = z
         const n = typeof v === 'string' ? Number(v) : v;
         return Number.isFinite(n) ? n : undefined;
       },
-      z.number("Enter duration").int().min(1, 'Minimum 1 hour')
+      z.number('validation_duration_required').int().min(1, 'validation_duration_min')
     ),
 
     dslrAddonPhotos: z.preprocess((v) => {
@@ -109,7 +147,7 @@ export const equipmentStepSchema = z
       }
       const n = typeof v === 'string' ? Number(v) : v;
       return Number.isFinite(n) ? n : v;
-    }, z.number('Enter a number').int().min(3).optional()),
+    }, z.number('validation_number_required').int().min(3).optional()),
   })
   .superRefine((v, ctx) => {
     const hasCCD = v.equipCanonIxus980is || v.equipHpCcd;
@@ -123,7 +161,7 @@ export const equipmentStepSchema = z
       ctx.addIssue({
         code: 'custom',
         path: ['equipCanonIxus980is'],
-        message: 'Please select at least one equipment option',
+        message: 'validation_equipment_required',
       });
     }
 
@@ -131,7 +169,7 @@ export const equipmentStepSchema = z
       ctx.addIssue({
         code: 'custom',
         path: ['dslrAddonPhotos'],
-        message: 'DSLR add-on is only available when Nikon (DSLR) is selected.',
+        message: 'validation_dslr_addon_only_with_nikon',
       });
     }
 
@@ -139,7 +177,7 @@ export const equipmentStepSchema = z
       ctx.addIssue({
         code: 'custom',
         path: ['dslrAddonPhotos'],
-        message: 'Add-on only with CCD/Phone packages (not with DSLR alone).',
+        message: 'validation_addon_only_with_ccd_phone',
       });
     }
 
@@ -147,17 +185,15 @@ export const equipmentStepSchema = z
       ctx.addIssue({
         code: 'custom',
         path: ['dslrAddonPhotos'],
-        message: 'With Nikon 2h+, CCD/Phone are included — DSLR add-on not applicable.',
+        message: 'validation_nikon_includes_ccd_phone',
       });
     }
-
   });
 
 export type ContactStep = z.infer<typeof contactStepSchema>;
 export type DetailsStep = z.infer<typeof detailsStepSchema>;
 export type ScheduleStep = z.infer<typeof scheduleStepSchema>;
 export type EquipmentStep = z.infer<typeof equipmentStepSchema>;
-
 
 function mergeDateTime(d: Date, hhmm: string): Date {
   const [h, m] = hhmm.split(':').map((n) => parseInt(n, 10));
@@ -166,7 +202,12 @@ function mergeDateTime(d: Date, hhmm: string): Date {
   return out;
 }
 
-export function buildAndValidateBooking(contact: ContactStep, details: DetailsStep, schedule: ScheduleStep, equipment: EquipmentStep) {
+export function buildAndValidateBooking(
+  contact: ContactStep,
+  details: DetailsStep,
+  schedule: ScheduleStep,
+  equipment: EquipmentStep
+) {
   const start = mergeDateTime(schedule.date, schedule.time);
   const end = new Date(start.getTime() + schedule.durationHours * 60 * 60 * 1000);
 

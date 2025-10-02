@@ -1,85 +1,77 @@
 import { NextResponse } from 'next/server';
-import { createServerClient } from '@/utils/supabase/server';
 import { bookingStatusUpdateSchema } from '@/schemas/bookingStatusUpdate';
+import type { ApiResponse } from '@/types/api';
+import { validateAuthentication } from '@/utils/api/auth';
+import {
+  createNotFoundResponse,
+  createRpcErrorResponse,
+  createServerErrorResponse,
+  createSuccessResponse,
+} from '@/utils/api/response';
+import { validateJsonRequest } from '@/utils/api/validation';
+import { createServerClient } from '@/utils/supabase/server';
 
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export async function PATCH(req: Request) {
-  const supabase = await createServerClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) {
-    return NextResponse.json(
-      { ok: false, error: { code: 'unauthorized', message: 'Auth required' } },
-      { status: 401 }
-    );
+export async function PATCH(req: Request): Promise<
+  NextResponse<
+    ApiResponse<{
+      request_uid: string;
+      status: string;
+      updated_at: string;
+    }>
+  >
+> {
+  const validation = await validateJsonRequest(req, bookingStatusUpdateSchema);
+  if (!validation.success) {
+    return validation.response as NextResponse<
+      ApiResponse<{
+        request_uid: string;
+        status: string;
+        updated_at: string;
+      }>
+    >;
   }
 
-  let body: unknown;
+  const auth = await validateAuthentication();
+  if (!auth.success) {
+    return auth.response as NextResponse<
+      ApiResponse<{
+        request_uid: string;
+        status: string;
+        updated_at: string;
+      }>
+    >;
+  }
+
   try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json(
-      { ok: false, error: { code: 'bad_request', message: 'JSON body required' } },
-      { status: 400 }
-    );
-  }
+    const supabase = await createServerClient();
+    const { requestUid, status } = validation.data;
 
-  const parsed = bookingStatusUpdateSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json(
+    const { data, error } = await supabase.rpc('set_booking_status', {
+      p_request_uid: requestUid,
+      p_status: status,
+    });
+
+    if (error) {
+      return createRpcErrorResponse(error.message);
+    }
+
+    if (!data) {
+      return createNotFoundResponse(`Booking not found for request_uid=${requestUid}`);
+    }
+
+    return createSuccessResponse(
       {
-        ok: false,
-        error: {
-          code: 'invalid_payload',
-          message: 'Invalid payload',
-          issues: parsed.error.issues,
-        },
-      },
-      { status: 400 }
-    );
-  }
-
-  const { requestUid, status } = parsed.data;
-
-  const { data, error } = await supabase.rpc('set_booking_status', {
-    p_request_uid: requestUid,
-    p_status: status,
-  });
-
-  if (error) {
-    return NextResponse.json(
-      { ok: false, error: { code: 'rpc_error', message: error.message } },
-      { status: 500 }
-    );
-  }
-
-  if (!data) {
-    return NextResponse.json(
-      {
-        ok: false,
-        error: {
-          code: 'not_found',
-          message: `Booking not found for request_uid=${requestUid}`,
-        },
-      },
-      { status: 404 }
-    );
-  }
-
-  return NextResponse.json(
-    {
-      ok: true,
-      data: {
         request_uid: data.request_uid,
         status: data.status,
         updated_at: data.updated_at,
       },
-    },
-    { status: 200 }
-  );
+      200
+    );
+  } catch (e: any) {
+    return createServerErrorResponse(e?.message ?? 'Unexpected error');
+  }
 }

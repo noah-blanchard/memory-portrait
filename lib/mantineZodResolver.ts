@@ -1,8 +1,8 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export type MantineZodResolverOptions = {
   pathSeparator?: string;
-  duplicateStrategy?: "first" | "all";
+  duplicateStrategy?: 'first' | 'all';
   multiMessageJoiner?: string;
   formLevelKey?: string;
 };
@@ -13,27 +13,27 @@ type ZodIssue = z.core.$ZodIssue;
 function issuesToMantineErrors(
   issues: ReadonlyArray<ZodIssue>,
   {
-    pathSeparator = ".",
-    duplicateStrategy = "first",
-    multiMessageJoiner = " | ",
-    formLevelKey = "_form",
+    pathSeparator = '.',
+    duplicateStrategy = 'first',
+    multiMessageJoiner = ' | ',
+    formLevelKey = '_form',
   }: MantineZodResolverOptions
 ): MantineErrors {
   const out: MantineErrors = {};
 
   const segToString = (seg: PropertyKey): string =>
-    typeof seg === "symbol" ? seg.description ?? seg.toString() : String(seg);
+    typeof seg === 'symbol' ? (seg.description ?? seg.toString()) : String(seg);
 
   const joinPath = (path: ReadonlyArray<PropertyKey>): string =>
     path.length === 0 ? formLevelKey : path.map(segToString).join(pathSeparator);
 
   for (const issue of issues) {
     const key = joinPath(issue.path);
-    const msg = issue.message || "Invalid value";
+    const msg = issue.message || 'Invalid value';
 
     if (!(key in out)) {
       out[key] = msg;
-    } else if (duplicateStrategy === "all") {
+    } else if (duplicateStrategy === 'all') {
       out[key] = `${out[key]}${multiMessageJoiner}${msg}`;
     }
   }

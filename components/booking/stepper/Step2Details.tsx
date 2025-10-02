@@ -1,28 +1,44 @@
 'use client';
 
-import { IconClover, IconSailboat } from '@tabler/icons-react';
+import { useEffect, useState } from 'react';
+import { IconCamera, IconClover, IconMapPin, IconSailboat } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import {
+  Box,
   Group,
   NativeSelect,
+  Paper,
+  rem,
   SegmentedControl,
   Stack,
+  Text,
+  Transition,
+  useMantineTheme,
 } from '@mantine/core';
-import { Button, InputLabel } from '@/components/I18nUI/I18nUI';
 import type { UseFormReturnType } from '@mantine/form';
+import { useMediaQuery } from '@mantine/hooks';
+import { InputLabel } from '@/components/I18nUI/I18nUI';
 import ButtonNumberInput from '@/components/number/NumberInput';
-import { useTranslation } from 'react-i18next';
 
 export default function Step2Details({
   form,
-  onBack,
-  onNext,
+  onBack: _onBack,
+  onNext: _onNext,
 }: {
   form: UseFormReturnType<any>;
   onBack: () => void;
   onNext: () => void;
 }) {
   const { t } = useTranslation('common');
-  
+  const theme = useMantineTheme();
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const [mounted, setMounted] = useState(false);
+  const [locationChanged, setLocationChanged] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const photoshootOptions = [
     { value: 'portrait', label: t('photoshoot_portrait') },
     { value: 'tourism', label: t('photoshoot_tourism') },
@@ -30,61 +46,172 @@ export default function Step2Details({
     { value: 'linkedin', label: t('photoshoot_linkedin') },
     { value: 'event', label: t('photoshoot_event') },
   ];
-  
+
+  const handleLocationChange = (value: string) => {
+    setLocationChanged(true);
+    form.setFieldValue('location', value);
+    if (value === 'Quebec City') {
+      form.setFieldValue('durationHours', 4);
+    } else {
+      form.setFieldValue('durationHours', 1);
+    }
+    setTimeout(() => setLocationChanged(false), 300);
+  };
+
   return (
-    <Stack gap="md">
-      <NativeSelect
-        label={t('step2_photoshoot_type')}
-        data={photoshootOptions}
-        withAsterisk
-        {...form.getInputProps('photoshootKind')}
-      />
+    <Transition mounted={mounted} transition="fade" duration={400}>
+      {(styles) => (
+        <Box style={styles}>
+          <Stack gap={isMobile ? 'lg' : 'md'}>
+            {/* Step Header */}
+            <Box ta="center" mb="xs">
+              <Text size={isMobile ? 'sm' : 'md'} fw={600} c="dimmed">
+                {t('step2_photoshoot_type')}
+              </Text>
+              <Text size="xs" c="dimmed" mt={2}>
+                {t('step2_location')} & {t('step2_people_count')}
+              </Text>
+            </Box>
 
-      <InputLabel size="lg" fw={600} required>
-        {t('step2_location')}
-      </InputLabel>
-      <SegmentedControl
-        defaultValue="Montreal"
-        data={[
-          {
-            label: (
-              <>
-                <IconClover size={20} style={{ marginRight: 6 }} />
-                {t('step2_montreal')}
-              </>
-            ),
-            value: 'Montreal',
-          },
-          {
-            label: (
-              <>
-                <IconSailboat size={20} style={{ marginRight: 6 }} />
-                {t('step2_quebec_city')}
-              </>
-            ),
-            value: 'Quebec City',
-          },
-        ]}
-        fullWidth
-        {...form.getInputProps('location')}
-        onChange={(value) => {
-          form.setFieldValue('location', value);
-          if (value === 'Quebec City') {
-            form.setFieldValue('durationHours', 4);
-          } else {
-            form.setFieldValue('durationHours', 1);
-          }
-        }}
-      />
+            {/* Photoshoot Type Selection */}
+            <Paper
+              p={isMobile ? 'md' : 'sm'}
+              radius="lg"
+              withBorder
+              style={{
+                background: `linear-gradient(135deg, ${theme.colors.slate[0]} 0%, ${theme.colors.emerald[0]} 100%)`,
+                border: `1px solid ${theme.colors.slate[2]}`,
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <NativeSelect
+                label={t('step2_photoshoot_type')}
+                data={photoshootOptions}
+                withAsterisk
+                leftSection={<IconCamera size={isMobile ? 18 : 16} />}
+                size={isMobile ? 'md' : 'sm'}
+                styles={{
+                  input: {
+                    fontSize: isMobile ? rem(16) : rem(14),
+                    padding: isMobile ? rem(12) : rem(10),
+                    paddingLeft: isMobile ? rem(36) : rem(32),
+                    borderRadius: rem(12),
+                    border: `2px solid ${theme.colors.slate[2]}`,
+                    transition: 'all 0.2s ease',
+                    color: theme.colors.dark[7],
+                    backgroundColor: '#ffffff',
+                    '&:focus': {
+                      borderColor: theme.colors.emerald[4],
+                      boxShadow: `0 0 0 3px ${theme.colors.emerald[1]}`,
+                      transform: 'translateY(-1px)',
+                    },
+                    '&:not([dataPlaceholder])': {
+                      color: theme.colors.dark[7],
+                    },
+                  },
+                  label: {
+                    fontSize: isMobile ? rem(14) : rem(12),
+                    fontWeight: 600,
+                    marginBottom: rem(8),
+                  },
+                }}
+                {...form.getInputProps('photoshootKind')}
+              />
+            </Paper>
 
-      <ButtonNumberInput label={t('step2_people_count')} {...form.getInputProps('peopleCount')} />
+            {/* Location Selection */}
+            <Paper
+              p={isMobile ? 'md' : 'sm'}
+              radius="lg"
+              withBorder
+              style={{
+                background: `linear-gradient(135deg, ${theme.colors.slate[0]} 0%, ${theme.colors.ocean[0]} 100%)`,
+                border: `1px solid ${theme.colors.slate[2]}`,
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <InputLabel size={isMobile ? 'md' : 'sm'} fw={600} required mb="sm">
+                <Group gap="xs">
+                  <IconMapPin size={isMobile ? 16 : 14} />
+                  {t('step2_location')}
+                </Group>
+              </InputLabel>
 
-      <Group justify="space-between" mt="md">
-        <Button variant="default" onClick={onBack}>
-          common_back
-        </Button>
-        <Button onClick={onNext}>common_next</Button>
-      </Group>
-    </Stack>
+              <SegmentedControl
+                value={form.values.location}
+                data={[
+                  {
+                    label: (
+                      <Group gap="xs" p="xs">
+                        <IconClover size={isMobile ? 18 : 16} />
+                        <Text size={isMobile ? 'sm' : 'xs'} fw={500}>
+                          {t('step2_montreal')}
+                        </Text>
+                      </Group>
+                    ),
+                    value: 'Montreal',
+                  },
+                  {
+                    label: (
+                      <Group gap="xs" p="xs">
+                        <IconSailboat size={isMobile ? 18 : 16} />
+                        <Text size={isMobile ? 'sm' : 'xs'} fw={500}>
+                          {t('step2_quebec_city')}
+                        </Text>
+                      </Group>
+                    ),
+                    value: 'Quebec City',
+                  },
+                ]}
+                fullWidth
+                size={isMobile ? 'md' : 'sm'}
+                radius="lg"
+                styles={{
+                  root: {
+                    background: theme.colors.slate[1],
+                    border: `2px solid ${theme.colors.slate[2]}`,
+                    borderRadius: rem(12),
+                    padding: rem(4),
+                  },
+                  control: {
+                    borderRadius: rem(8),
+                    transition: 'all 0.2s ease',
+                    '&[dataActive]': {
+                      background: `linear-gradient(135deg, ${theme.colors.ocean[6]} 0%, ${theme.colors.emerald[6]} 100%)`,
+                      boxShadow: `0 2px 8px ${theme.colors.ocean[3]}`,
+                      transform: 'scale(1.02)',
+                    },
+                  },
+                }}
+                onChange={handleLocationChange}
+              />
+            </Paper>
+
+            {/* People Count */}
+            <Transition mounted transition="slide-up" duration={300} timingFunction="ease-out">
+              {(peopleStyles) => (
+                <Paper
+                  p={isMobile ? 'md' : 'sm'}
+                  radius="lg"
+                  withBorder
+                  style={{
+                    ...peopleStyles,
+                    background: `linear-gradient(135deg, ${theme.colors.slate[0]} 0%, ${theme.colors.rose[0]} 100%)`,
+                    border: `1px solid ${theme.colors.slate[2]}`,
+                    transition: 'all 0.2s ease',
+                    transform: locationChanged ? 'scale(1.02)' : 'scale(1)',
+                  }}
+                >
+                  <ButtonNumberInput
+                    label={t('step2_people_count')}
+                    {...form.getInputProps('peopleCount')}
+                  />
+                </Paper>
+              )}
+            </Transition>
+          </Stack>
+        </Box>
+      )}
+    </Transition>
   );
 }

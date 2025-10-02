@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react';
 import { Center, Loader, Stack } from '@mantine/core';
 import { Alert, Button, Title } from '@/components/I18nUI/I18nUI';
-import BookingsGroupedView from './ui/BookingsGroupedView';
 import type { BookingGrouped } from '@/schemas/bookingGrouped';
 import type { BookingStatus } from './statusTheme';
+import BookingsGroupedView from './ui/BookingsGroupedView';
 
 export default function BookingsPanel() {
   const [data, setData] = useState<BookingGrouped | null>(null);
@@ -76,14 +76,22 @@ export default function BookingsPanel() {
   };
 
   if (loading) {
-    return (<Center mih="40dvh"><Loader /></Center>);
+    return (
+      <Center mih="40dvh">
+        <Loader />
+      </Center>
+    );
   }
 
   if (err) {
     return (
       <Stack>
-        <Alert color="red" variant="light" title="admin_error_loading">{err}</Alert>
-        <Button onClick={load} variant="light">common_retry</Button>
+        <Alert color="red" variant="light" title="admin_error_loading">
+          {err}
+        </Alert>
+        <Button onClick={load} variant="light">
+          common_retry
+        </Button>
       </Stack>
     );
   }

@@ -1,29 +1,30 @@
 'use client';
 
-import { useTranslation } from 'react-i18next';
-import { 
-  Stack, 
-  Group, 
-  Text, 
-  Title, 
-  Card, 
-  Badge, 
-  Divider,
-  Button,
-  Box,
-  Grid,
-} from '@mantine/core';
-import { 
-  IconUser, 
-  IconCalendar, 
-  IconClock, 
-  IconMapPin, 
-  IconCamera, 
+import { useEffect, useState } from 'react';
+import {
+  IconCalendar,
+  IconCamera,
+  IconClock,
+  IconCurrencyDollar,
+  IconMapPin,
+  IconUser,
   IconUsers,
-  IconEdit,
-  IconCheck,
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
+import {
+  Badge,
+  Box,
+  Divider,
+  Grid,
+  Group,
+  Paper,
+  Stack,
+  Text,
+  Transition,
+  useMantineTheme,
+} from '@mantine/core';
 import type { UseFormReturnType } from '@mantine/form';
+import { useMediaQuery } from '@mantine/hooks';
 import { estimatePrice } from './helpers';
 
 interface Step5ReviewProps {
@@ -33,9 +34,21 @@ interface Step5ReviewProps {
   loading: boolean;
 }
 
-export default function Step5Review({ form, onBack, onNext, loading }: Step5ReviewProps) {
+export default function Step5Review({
+  form,
+  onBack: _onBack,
+  onNext: _onNext,
+  loading: _loading,
+}: Step5ReviewProps) {
   const { t } = useTranslation('common');
+  const theme = useMantineTheme();
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const [mounted, setMounted] = useState(false);
   const values = form.values;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const formatDate = (date: Date | null | string) => {
     if (!date) {
@@ -45,11 +58,11 @@ export default function Step5Review({ form, onBack, onNext, loading }: Step5Revi
     if (isNaN(dateObj.getTime())) {
       return t('receipt_no_data');
     }
-    return dateObj.toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    return dateObj.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     });
   };
 
@@ -92,7 +105,7 @@ export default function Step5Review({ form, onBack, onNext, loading }: Step5Revi
     if (values.equipNikonDslr) {
       equipment.push(t('equipment_nikon'));
     }
-    
+
     return equipment.length > 0 ? equipment : [t('receipt_none_selected')];
   };
 
@@ -100,212 +113,335 @@ export default function Step5Review({ form, onBack, onNext, loading }: Step5Revi
     return method === 'wechat' ? t('step1_wechat') : t('step1_instagram');
   };
 
-
   return (
-    <Stack gap="md">
-      <Box ta="center">
-        <Title order={4} mb="xs">{t('step4_review_title')}</Title>
-        <Text c="dimmed" size="xs">{t('step4_review_subtitle')}</Text>
-      </Box>
+    <Transition mounted={mounted} transition="fade" duration={400}>
+      {(styles) => (
+        <Box style={styles}>
+          <Stack gap={isMobile ? 'lg' : 'md'}>
+            {/* Step Header */}
+            <Box ta="center" mb="xs">
+              <Text size={isMobile ? 'sm' : 'md'} fw={600} c="dimmed">
+                {t('step4_review_title')}
+              </Text>
+              <Text size="xs" c="dimmed" mt={2}>
+                {t('step4_review_subtitle')}
+              </Text>
+            </Box>
 
-      <Card withBorder radius="md" p="md">
-        <Stack gap="sm">
-          <Box>
-            <Group gap="xs" mb="xs">
-              <IconUser size={16} />
-              <Text fw={600} size="sm">{t('step4_review_contact')}</Text>
-            </Group>
-            <Grid>
-              <Grid.Col span={6}>
-                <Text size="xs" c="dimmed">{t('receipt_name')}</Text>
-                <Text fw={500} size="sm">{values.clientName}</Text>
-              </Grid.Col>
-              <Grid.Col span={6}>
-                <Text size="xs" c="dimmed">{t('receipt_contact')}</Text>
-                <Group gap="xs">
-                  <Badge size="xs" variant="light" color="ocean">
-                    {getContactMethodLabel(values.contactMethod)}
-                  </Badge>
-                  <Text fw={500} size="sm">{values.contact}</Text>
-                </Group>
-              </Grid.Col>
-            </Grid>
-          </Box>
-
-          <Divider />
-
-          <Box>
-            <Group gap="xs" mb="xs">
-              <IconCamera size={16} />
-              <Text fw={600} size="sm">{t('step4_review_details')}</Text>
-            </Group>
-            <Grid>
-              <Grid.Col span={6}>
-                <Text size="xs" c="dimmed">{t('receipt_type')}</Text>
-                <Badge size="xs" variant="light" color="emerald">
-                  {getPhotoshootTypeLabel(values.photoshootKind)}
-                </Badge>
-              </Grid.Col>
-              <Grid.Col span={6}>
-                <Text size="xs" c="dimmed">{t('receipt_location')}</Text>
-                <Group gap="xs">
-                  <IconMapPin size={12} />
-                  <Text fw={500} size="sm">{getLocationLabel(values.location)}</Text>
-                </Group>
-              </Grid.Col>
-              <Grid.Col span={6}>
-                <Text size="xs" c="dimmed">{t('receipt_people')}</Text>
-                <Group gap="xs">
-                  <IconUsers size={12} />
-                  <Text fw={500} size="sm">{values.peopleCount}</Text>
-                </Group>
-              </Grid.Col>
-            </Grid>
-          </Box>
-
-          <Divider />
-
-          <Box>
-            <Group gap="xs" mb="xs">
-              <IconCalendar size={16} />
-              <Text fw={600} size="sm">{t('step4_review_schedule')}</Text>
-            </Group>
-            <Grid>
-              <Grid.Col span={6}>
-                <Text size="xs" c="dimmed">{t('receipt_date')}</Text>
-                <Text fw={500} size="sm">{formatDate(values.date)}</Text>
-              </Grid.Col>
-              <Grid.Col span={6}>
-                <Text size="xs" c="dimmed">{t('receipt_start')}</Text>
-                <Group gap="xs">
-                  <IconClock size={12} />
-                  <Text fw={500} size="sm">{formatTime(values.time)}</Text>
-                </Group>
-              </Grid.Col>
-              <Grid.Col span={6}>
-                <Text size="xs" c="dimmed">{t('receipt_duration')}</Text>
-                <Text fw={500} size="sm">{values.durationHours} {t('receipt_hours')}</Text>
-              </Grid.Col>
-              <Grid.Col span={6}>
-                <Text size="xs" c="dimmed">{t('receipt_extra_edits')}</Text>
-                <Text fw={500} size="sm">{values.extraEdits}</Text>
-              </Grid.Col>
-            </Grid>
-          </Box>
-
-          <Divider />
-
-          <Box>
-            <Group gap="xs" mb="xs">
-              <IconCamera size={16} />
-              <Text fw={600} size="sm">{t('receipt_equipments')}</Text>
-            </Group>
-            <Group gap="xs" wrap="wrap">
-              {getSelectedEquipment().map((equipment, index) => (
-                <Badge key={index} size="xs" variant="light" color="ocean">
-                  {equipment}
-                </Badge>
-              ))}
-              {values.dslrAddonPhotos > 0 && (
-                <Badge size="xs" variant="light" color="rose">
-                  {t('receipt_dslr_addon')}: {values.dslrAddonPhotos} {t('receipt_photos')}
-                </Badge>
-              )}
-            </Group>
-          </Box>
-
-          <Divider />
-
-          <Box>
-            <Text fw={600} size="xs" mb="xs" c="dimmed">{t('receipt_pricing')}</Text>
-            <Stack gap={4}>
-              {(() => {
-                const equipment = {
-                  equipCanonIxus980is: values.equipCanonIxus980is || false,
-                  equipHpCcd: values.equipHpCcd || false,
-                  equipIphoneX: values.equipIphoneX || false,
-                  equipIphone13: values.equipIphone13 || false,
-                  equipNikonDslr: values.equipNikonDslr || false,
-                };
-
-                const priceBreakdown = estimatePrice({
-                  people: values.peopleCount || 1,
-                  equipment,
-                  durationHours: values.durationHours || 1,
-                  addonPhotos: values.dslrAddonPhotos || 0,
-                  location: values.location || 'Montreal',
-                  transportationFee: values.location === 'Quebec City' ? 100 : 0,
-                  extraEdits: values.extraEdits || 0,
-                });
-
-                return (
-                  <>
-                    <Group justify="space-between">
-                      <Text size="xs" c="dimmed">{priceBreakdown.hours}h × ${priceBreakdown.baseHourly} ({priceBreakdown.package})</Text>
-                      <Text fw={500} size="xs">${priceBreakdown.base}</Text>
-                    </Group>
-                    {priceBreakdown.peopleSurcharge > 0 && (
-                      <Group justify="space-between">
-                        <Text size="xs" c="dimmed">+{values.peopleCount - 1} {t('receipt_extra_people')}</Text>
-                        <Text fw={500} size="xs">+${priceBreakdown.peopleSurcharge}</Text>
+            {/* Review Card */}
+            <Paper
+              radius="xl"
+              p={isMobile ? 'lg' : 'md'}
+              withBorder
+              style={{
+                background: `linear-gradient(135deg, ${theme.colors.slate[0]} 0%, ${theme.colors.ocean[0]} 100%)`,
+                border: `1px solid ${theme.colors.slate[2]}`,
+                boxShadow: `0 8px 32px ${theme.colors.slate[2]}`,
+              }}
+            >
+              <Stack gap={isMobile ? 'lg' : 'md'}>
+                {/* Contact Information */}
+                <Transition mounted transition="slide-up" duration={300}>
+                  {(contactStyles) => (
+                    <Box style={contactStyles}>
+                      <Group gap="xs" mb="md">
+                        <IconUser size={isMobile ? 20 : 16} color={theme.colors.ocean[6]} />
+                        <Text fw={600} size={isMobile ? 'md' : 'sm'}>
+                          {t('step4_review_contact')}
+                        </Text>
                       </Group>
-                    )}
-                    {priceBreakdown.cityFee > 0 && (
-                      <Group justify="space-between">
-                        <Text size="xs" c="dimmed">{t('receipt_qc_fee')}</Text>
-                        <Text fw={500} size="xs">+${priceBreakdown.cityFee}</Text>
-                      </Group>
-                    )}
-                    {priceBreakdown.addonCost > 0 && (
-                      <Group justify="space-between">
-                        <Text size="xs" c="dimmed">{priceBreakdown.addonPhotos} {t('receipt_photos')}</Text>
-                        <Text fw={500} size="xs">+${priceBreakdown.addonCost}</Text>
-                      </Group>
-                    )}
-                    {priceBreakdown.extraEditsCost > 0 && (
-                      <Group justify="space-between">
-                        <Text size="xs" c="dimmed">{priceBreakdown.extraEdits} {t('receipt_extra_edits_line')}</Text>
-                        <Text fw={500} size="xs">+${priceBreakdown.extraEditsCost}</Text>
-                      </Group>
-                    )}
-                    {priceBreakdown.transportationFee > 0 && (
-                      <Group justify="space-between">
-                        <Text size="xs" c="dimmed">{t('receipt_transport_fee')}</Text>
-                        <Text fw={500} size="xs">+${priceBreakdown.transportationFee}</Text>
-                      </Group>
-                    )}
-                    <Divider />
-                    <Group justify="space-between">
-                      <Text fw={600} size="xs">{t('receipt_total')}</Text>
-                      <Text fw={700} size="sm" c="ocean">${priceBreakdown.total}</Text>
-                    </Group>
-                  </>
-                );
-              })()}
-            </Stack>
-          </Box>
-        </Stack>
-      </Card>
+                      <Grid>
+                        <Grid.Col span={isMobile ? 12 : 6}>
+                          <Text size={isMobile ? 'sm' : 'xs'} c="dimmed" mb="xs">
+                            {t('receipt_name')}
+                          </Text>
+                          <Text fw={500} size={isMobile ? 'md' : 'sm'}>
+                            {values.clientName}
+                          </Text>
+                        </Grid.Col>
+                        <Grid.Col span={isMobile ? 12 : 6}>
+                          <Text size={isMobile ? 'sm' : 'xs'} c="dimmed" mb="xs">
+                            {t('receipt_contact')}
+                          </Text>
+                          <Group gap="xs">
+                            <Badge size={isMobile ? 'sm' : 'xs'} variant="light" color="ocean">
+                              {getContactMethodLabel(values.contactMethod)}
+                            </Badge>
+                            <Text fw={500} size={isMobile ? 'md' : 'sm'}>
+                              {values.contact}
+                            </Text>
+                          </Group>
+                        </Grid.Col>
+                      </Grid>
+                    </Box>
+                  )}
+                </Transition>
 
-      <Group justify="space-between" mt="sm">
-        <Button 
-          variant="default" 
-          size="sm"
-          onClick={onBack} 
-          disabled={loading}
-          leftSection={<IconEdit size={14} />}
-        >
-          {t('step4_review_edit')}
-        </Button>
-        <Button 
-          size="sm"
-          onClick={onNext} 
-          loading={loading}
-          leftSection={<IconCheck size={14} />}
-        >
-          {t('step4_review_confirm')}
-        </Button>
-      </Group>
-    </Stack>
+                <Divider />
+
+                {/* Photoshoot Details */}
+                <Transition mounted transition="slide-up" duration={300}>
+                  {(detailsStyles) => (
+                    <Box style={detailsStyles}>
+                      <Group gap="xs" mb="md">
+                        <IconCamera size={isMobile ? 20 : 16} color={theme.colors.emerald[6]} />
+                        <Text fw={600} size={isMobile ? 'md' : 'sm'}>
+                          {t('step4_review_details')}
+                        </Text>
+                      </Group>
+                      <Grid>
+                        <Grid.Col span={isMobile ? 12 : 6}>
+                          <Text size={isMobile ? 'sm' : 'xs'} c="dimmed" mb="xs">
+                            {t('receipt_type')}
+                          </Text>
+                          <Badge size={isMobile ? 'sm' : 'xs'} variant="light" color="emerald">
+                            {getPhotoshootTypeLabel(values.photoshootKind)}
+                          </Badge>
+                        </Grid.Col>
+                        <Grid.Col span={isMobile ? 12 : 6}>
+                          <Text size={isMobile ? 'sm' : 'xs'} c="dimmed" mb="xs">
+                            {t('receipt_location')}
+                          </Text>
+                          <Group gap="xs">
+                            <IconMapPin size={isMobile ? 16 : 12} />
+                            <Text fw={500} size={isMobile ? 'md' : 'sm'}>
+                              {getLocationLabel(values.location)}
+                            </Text>
+                          </Group>
+                        </Grid.Col>
+                        <Grid.Col span={isMobile ? 12 : 6}>
+                          <Text size={isMobile ? 'sm' : 'xs'} c="dimmed" mb="xs">
+                            {t('receipt_people')}
+                          </Text>
+                          <Group gap="xs">
+                            <IconUsers size={isMobile ? 16 : 12} />
+                            <Text fw={500} size={isMobile ? 'md' : 'sm'}>
+                              {values.peopleCount}
+                            </Text>
+                          </Group>
+                        </Grid.Col>
+                      </Grid>
+                    </Box>
+                  )}
+                </Transition>
+
+                <Divider />
+
+                {/* Schedule */}
+                <Transition mounted transition="slide-up" duration={300}>
+                  {(scheduleStyles) => (
+                    <Box style={scheduleStyles}>
+                      <Group gap="xs" mb="md">
+                        <IconCalendar size={isMobile ? 20 : 16} color={theme.colors.rose[6]} />
+                        <Text fw={600} size={isMobile ? 'md' : 'sm'}>
+                          {t('step4_review_schedule')}
+                        </Text>
+                      </Group>
+                      <Grid>
+                        <Grid.Col span={isMobile ? 12 : 6}>
+                          <Text size={isMobile ? 'sm' : 'xs'} c="dimmed" mb="xs">
+                            {t('receipt_date')}
+                          </Text>
+                          <Text fw={500} size={isMobile ? 'md' : 'sm'}>
+                            {formatDate(values.date)}
+                          </Text>
+                        </Grid.Col>
+                        <Grid.Col span={isMobile ? 12 : 6}>
+                          <Text size={isMobile ? 'sm' : 'xs'} c="dimmed" mb="xs">
+                            {t('receipt_start')}
+                          </Text>
+                          <Group gap="xs">
+                            <IconClock size={isMobile ? 16 : 12} />
+                            <Text fw={500} size={isMobile ? 'md' : 'sm'}>
+                              {formatTime(values.time)}
+                            </Text>
+                          </Group>
+                        </Grid.Col>
+                        <Grid.Col span={isMobile ? 12 : 6}>
+                          <Text size={isMobile ? 'sm' : 'xs'} c="dimmed" mb="xs">
+                            {t('receipt_duration')}
+                          </Text>
+                          <Text fw={500} size={isMobile ? 'md' : 'sm'}>
+                            {values.durationHours} {t('receipt_hours')}
+                          </Text>
+                        </Grid.Col>
+                        <Grid.Col span={isMobile ? 12 : 6}>
+                          <Text size={isMobile ? 'sm' : 'xs'} c="dimmed" mb="xs">
+                            {t('receipt_extra_edits')}
+                          </Text>
+                          <Text fw={500} size={isMobile ? 'md' : 'sm'}>
+                            {values.extraEdits || 0}
+                          </Text>
+                        </Grid.Col>
+                      </Grid>
+                    </Box>
+                  )}
+                </Transition>
+
+                <Divider />
+
+                {/* Equipment */}
+                <Transition mounted transition="slide-up" duration={300}>
+                  {(equipmentStyles) => (
+                    <Box style={equipmentStyles}>
+                      <Group gap="xs" mb="md">
+                        <IconCamera size={isMobile ? 20 : 16} color={theme.colors.ocean[6]} />
+                        <Text fw={600} size={isMobile ? 'md' : 'sm'}>
+                          {t('receipt_equipments')}
+                        </Text>
+                      </Group>
+                      <Group gap="xs" wrap="wrap">
+                        {getSelectedEquipment().map((equipment, index) => (
+                          <Badge
+                            key={index}
+                            size={isMobile ? 'sm' : 'xs'}
+                            variant="light"
+                            color="ocean"
+                          >
+                            {equipment}
+                          </Badge>
+                        ))}
+                        {values.dslrAddonPhotos > 0 && (
+                          <Badge size={isMobile ? 'sm' : 'xs'} variant="light" color="rose">
+                            {t('receipt_dslr_addon')}: {values.dslrAddonPhotos}{' '}
+                            {t('receipt_photos')}
+                          </Badge>
+                        )}
+                      </Group>
+                    </Box>
+                  )}
+                </Transition>
+
+                <Divider />
+
+                {/* Pricing */}
+                <Transition mounted transition="slide-up" duration={300}>
+                  {(pricingStyles) => (
+                    <Box style={pricingStyles}>
+                      <Group gap="xs" mb="md">
+                        <IconCurrencyDollar
+                          size={isMobile ? 20 : 16}
+                          color={theme.colors.emerald[6]}
+                        />
+                        <Text fw={600} size={isMobile ? 'md' : 'sm'}>
+                          {t('receipt_pricing')}
+                        </Text>
+                        <Badge size="xs" variant="light" color="emerald">
+                          {t('receipt_pricing_estimated')}
+                        </Badge>
+                      </Group>
+
+                      <Paper
+                        p="md"
+                        radius="lg"
+                        style={{
+                          background: `linear-gradient(135deg, ${theme.colors.emerald[0]} 0%, ${theme.colors.ocean[0]} 100%)`,
+                          border: `1px solid ${theme.colors.emerald[2]}`,
+                        }}
+                      >
+                        <Stack gap={isMobile ? 'sm' : 'xs'}>
+                          {(() => {
+                            const equipment = {
+                              equipCanonIxus980is: values.equipCanonIxus980is || false,
+                              equipHpCcd: values.equipHpCcd || false,
+                              equipIphoneX: values.equipIphoneX || false,
+                              equipIphone13: values.equipIphone13 || false,
+                              equipNikonDslr: values.equipNikonDslr || false,
+                            };
+
+                            const priceBreakdown = estimatePrice({
+                              people: values.peopleCount || 1,
+                              equipment,
+                              durationHours: values.durationHours || 1,
+                              addonPhotos: values.dslrAddonPhotos || 0,
+                              location: values.location || 'Montreal',
+                              transportationFee: values.location === 'Quebec City' ? 100 : 0,
+                              extraEdits: values.extraEdits || 0,
+                            });
+
+                            return (
+                              <>
+                                <Group justify="space-between">
+                                  <Text size={isMobile ? 'sm' : 'xs'} c="dimmed">
+                                    {priceBreakdown.hours}h × ${priceBreakdown.baseHourly} (
+                                    {priceBreakdown.package})
+                                  </Text>
+                                  <Text fw={500} size={isMobile ? 'md' : 'sm'}>
+                                    ${priceBreakdown.base}
+                                  </Text>
+                                </Group>
+                                {priceBreakdown.peopleSurcharge > 0 && (
+                                  <Group justify="space-between">
+                                    <Text size={isMobile ? 'sm' : 'xs'} c="dimmed">
+                                      +{values.peopleCount - 1} {t('receipt_extra_people')}
+                                    </Text>
+                                    <Text fw={500} size={isMobile ? 'md' : 'sm'}>
+                                      +${priceBreakdown.peopleSurcharge}
+                                    </Text>
+                                  </Group>
+                                )}
+                                {priceBreakdown.cityFee > 0 && (
+                                  <Group justify="space-between">
+                                    <Text size={isMobile ? 'sm' : 'xs'} c="dimmed">
+                                      {t('receipt_qc_fee')}
+                                    </Text>
+                                    <Text fw={500} size={isMobile ? 'md' : 'sm'}>
+                                      +${priceBreakdown.cityFee}
+                                    </Text>
+                                  </Group>
+                                )}
+                                {priceBreakdown.addonCost > 0 && (
+                                  <Group justify="space-between">
+                                    <Text size={isMobile ? 'sm' : 'xs'} c="dimmed">
+                                      {priceBreakdown.addonPhotos} {t('receipt_photos')}
+                                    </Text>
+                                    <Text fw={500} size={isMobile ? 'md' : 'sm'}>
+                                      +${priceBreakdown.addonCost}
+                                    </Text>
+                                  </Group>
+                                )}
+                                {priceBreakdown.extraEditsCost > 0 && (
+                                  <Group justify="space-between">
+                                    <Text size={isMobile ? 'sm' : 'xs'} c="dimmed">
+                                      {priceBreakdown.extraEdits} {t('receipt_extra_edits_line')}
+                                    </Text>
+                                    <Text fw={500} size={isMobile ? 'md' : 'sm'}>
+                                      +${priceBreakdown.extraEditsCost}
+                                    </Text>
+                                  </Group>
+                                )}
+                                {priceBreakdown.transportationFee > 0 && (
+                                  <Group justify="space-between">
+                                    <Text size={isMobile ? 'sm' : 'xs'} c="dimmed">
+                                      {t('receipt_transport_fee')}
+                                    </Text>
+                                    <Text fw={500} size={isMobile ? 'md' : 'sm'}>
+                                      +${priceBreakdown.transportationFee}
+                                    </Text>
+                                  </Group>
+                                )}
+                                <Divider />
+                                <Group justify="space-between">
+                                  <Text fw={600} size={isMobile ? 'md' : 'sm'}>
+                                    {t('receipt_total')}
+                                  </Text>
+                                  <Text fw={700} size={isMobile ? 'lg' : 'md'} c="ocean">
+                                    ${priceBreakdown.total}
+                                  </Text>
+                                </Group>
+                              </>
+                            );
+                          })()}
+                        </Stack>
+                      </Paper>
+                    </Box>
+                  )}
+                </Transition>
+              </Stack>
+            </Paper>
+          </Stack>
+        </Box>
+      )}
+    </Transition>
   );
 }

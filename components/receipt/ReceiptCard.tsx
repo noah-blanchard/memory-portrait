@@ -5,10 +5,10 @@ import { useEffect, useState } from 'react';
 import { Roboto_Mono } from 'next/font/google';
 import { IconCheck, IconCopy, IconDownload } from '@tabler/icons-react';
 import html2canvas from 'html2canvas';
+import { useTranslation } from 'react-i18next';
 import { Box, Collapse, CopyButton, Group, Paper, Stack, Transition } from '@mantine/core';
 import { Button, Text, Tooltip } from '@/components/I18nUI/I18nUI';
 import { estimatePrice, RATES } from '../booking/stepper/helpers';
-
 
 const receiptFont = Roboto_Mono({ subsets: ['latin'], weight: '400' });
 
@@ -44,6 +44,7 @@ export default function ReceiptCard({
   data: ReceiptData | null;
   onNew: () => void;
 }) {
+  const { t } = useTranslation('common');
   const mounted = !!data;
   const [opened, setOpened] = useState(false);
 
@@ -142,14 +143,17 @@ export default function ReceiptCard({
               <Collapse in={opened} transitionDuration={400}>
                 <Group justify="space-between" mb={6} gap="xs" wrap="nowrap">
                   <Text fw={900} tt="uppercase">
-                    Receipt
+                    {t('receipt_title')}
                   </Text>
 
                   {data?.id ? (
                     <Group gap={4} wrap="nowrap">
                       <CopyButton value={data.id}>
                         {({ copied, copy }) => (
-                          <Tooltip label={copied ? 'Copied' : 'Copy ID'} withArrow>
+                          <Tooltip
+                            label={copied ? t('receipt_copied') : t('receipt_copy_id')}
+                            withArrow
+                          >
                             <Button
                               variant="subtle"
                               size="compact-xs"
@@ -168,71 +172,77 @@ export default function ReceiptCard({
                         variant="subtle"
                         size="compact-xs"
                         onClick={() => downloadReceipt(data.id)}
-                        aria-label="Download receipt"
+                        aria-label={t('receipt_download')}
                       >
                         <IconDownload size={14} />
                       </Button>
                     </Group>
                   ) : (
-                    <Text c="dimmed">(no id)</Text>
+                    <Text c="dimmed">{t('receipt_no_id')}</Text>
                   )}
                 </Group>
 
                 {line}
 
-                <Row label="Name" value={data.name} />
-                <Row label="Contact" value={`${cap(data.method)} • ${data.contact}`} />
-                <Row label="Type" value={cap(data.kind)} />
-                {data.location ? <Row label="Location" value={String(data.location)} /> : null}
+                <Row label={t('receipt_name')} value={data.name} />
+                <Row label={t('receipt_contact')} value={`${cap(data.method)} • ${data.contact}`} />
+                <Row label={t('receipt_type')} value={cap(data.kind)} />
+                {data.location ? (
+                  <Row label={t('receipt_location')} value={String(data.location)} />
+                ) : null}
 
                 {line}
 
-                <Row label="Date" value={data.date} />
-                <Row label="Start" value={data.start} />
-                <Row label="End" value={data.end} />
-                <Row label="Duration" value={`${pricing.hours}h`} />
-                <Row label="People" value={String(data.peopleCount ?? 1)} />
+                <Row label={t('receipt_date')} value={data.date} />
+                <Row label={t('receipt_start')} value={data.start} />
+                <Row label={t('receipt_end')} value={data.end} />
+                <Row label={t('receipt_duration')} value={`${pricing.hours}h`} />
+                <Row label={t('receipt_people')} value={String(data.peopleCount ?? 1)} />
                 {line}
 
-                <Row label="Package" value={cap(pricing.package.replace('_', ' '))} />
-                <Row label="Included edits" value={`${pricing.includedEdits}`} />
-                {data?.extraEdits !== 0 && <Row label="Extra edits" value={`${data.extraEdits}`} />}
+                <Row label={t('receipt_package')} value={cap(pricing.package.replace('_', ' '))} />
+                <Row label={t('receipt_included_edits')} value={`${pricing.includedEdits}`} />
+                {data?.extraEdits !== 0 && (
+                  <Row label={t('receipt_extra_edits')} value={`${data.extraEdits}`} />
+                )}
                 {line}
 
                 <Text size="sm" fw={900} tt="uppercase" mt={4}>
-                  Equipment(s)
+                  {t('receipt_equipments')}
                 </Text>
 
                 {!anyEquip ? (
                   <Text size="xs" c="dimmed">
-                    (none selected)
+                    {t('receipt_none_selected')}
                   </Text>
                 ) : (
                   <Stack gap={6}>
                     {hasCCD && (
                       <Stack gap={2}>
                         <Text size="xs" c="dimmed">
-                          CCD Cameras{includesCcdPhone ? ' (included)' : ''}
+                          {includesCcdPhone ? t('receipt_ccd_included') : t('receipt_ccd_cameras')}
                         </Text>
-                        {data.equipCanonIxus980is && <EquipLine label="Canon ixus980is (CCD)" />}
-                        {data.equipHpCcd && <EquipLine label="HP (CCD)" />}
+                        {data.equipCanonIxus980is && (
+                          <EquipLine label={t('receipt_canon_ixus980is')} />
+                        )}
+                        {data.equipHpCcd && <EquipLine label={t('receipt_hp_ccd')} />}
                       </Stack>
                     )}
                     {hasPhones && (
                       <Stack gap={2}>
                         <Text size="xs" c="dimmed">
-                          Phones{includesCcdPhone ? ' (included)' : ''}
+                          {includesCcdPhone ? t('receipt_phones_included') : t('receipt_phones')}
                         </Text>
-                        {data.equipIphoneX && <EquipLine label="iPhone X" />}
-                        {data.equipIphone13 && <EquipLine label="iPhone 13" />}
+                        {data.equipIphoneX && <EquipLine label={t('receipt_iphone_x')} />}
+                        {data.equipIphone13 && <EquipLine label={t('receipt_iphone_13')} />}
                       </Stack>
                     )}
                     {hasDSLR && (
                       <Stack gap={2}>
                         <Text size="xs" c="dimmed">
-                          DSLR
+                          {t('receipt_dslr')}
                         </Text>
-                        {data.equipNikonDslr && <EquipLine label="Nikon (DSLR)" />}
+                        {data.equipNikonDslr && <EquipLine label={t('receipt_nikon_dslr')} />}
                       </Stack>
                     )}
                   </Stack>
@@ -241,55 +251,65 @@ export default function ReceiptCard({
                 {line}
 
                 <Text size="sm" fw={900} tt="uppercase" mt={4}>
-                  Pricing (estimated)
+                  {t('receipt_pricing_estimated')}
                 </Text>
 
-                <RowCurrency label={`${pricing.hours} hours`} amount={pricing.base} />
+                <RowCurrency
+                  label={`${pricing.hours} ${t('receipt_hours')}`}
+                  amount={pricing.base}
+                />
 
                 {pricing.peopleSurcharge > 0 && (
                   <RowCurrency
                     label={
                       extraPersons > 0
-                        ? `Extra ppl. (${extraPersons}×$${pricing.peopleSurchargeHourly}/h)`
-                        : 'Extra ppl.'
+                        ? t('receipt_extra_people_hourly', {
+                            count: extraPersons,
+                            price: pricing.peopleSurchargeHourly,
+                          })
+                        : t('receipt_extra_people')
                     }
                     amount={pricing.peopleSurcharge}
                   />
                 )}
 
                 {pricing.cityFee > 0 && (
-                  <RowCurrency label="Quebec City fee" amount={pricing.cityFee} />
+                  <RowCurrency label={t('receipt_qc_fee')} amount={pricing.cityFee} />
                 )}
 
                 {pricing.transportationFee > 0 && (
-                  <RowCurrency label="Transportation fee (avg.)" amount={pricing.transportationFee} />
+                  <RowCurrency
+                    label={t('receipt_transport_fee')}
+                    amount={pricing.transportationFee}
+                  />
                 )}
 
                 {pricing.addonPhotos > 0 && (
                   <RowCurrency
-                    label={`DSLR add-on (${pricing.addonPhotos} photo${
-                      pricing.addonPhotos > 1 ? 's' : ''
-                    })`}
+                    label={`${t('receipt_dslr_addon')} (${pricing.addonPhotos} ${pricing.addonPhotos > 1 ? t('receipt_photos_plural') : t('receipt_photos')})`}
                     amount={pricing.addonCost}
                   />
                 )}
 
                 {pricing.extraEditsCost > 0 && (
                   <RowCurrency
-                    label={`Extra edits (${pricing.extraEdits} × $${RATES.EDIT_EXTRA_PRICE})`}
+                    label={t('receipt_extra_edits_line', {
+                      count: pricing.extraEdits,
+                      price: RATES.EDIT_EXTRA_PRICE,
+                    })}
                     amount={pricing.extraEditsCost}
                   />
                 )}
 
                 {durationMinEnforced && (
                   <Text size="xs" c="dimmed">
-                    • Minimum duration enforced by location/package rules
+                    {t('receipt_minimum_duration_note')}
                   </Text>
                 )}
 
                 {line}
 
-                <RowCurrency label="Total" amount={pricing.total} strong />
+                <RowCurrency label={t('receipt_total')} amount={pricing.total} strong />
 
                 {pricing.warnings.length > 0 && (
                   <Stack gap={2} mt={2}>
@@ -309,7 +329,7 @@ export default function ReceiptCard({
                       ? dayjs(data.createdAt).format('YYYY-MM-DD HH:mm')
                       : dayjs().format('YYYY-MM-DD HH:mm')}
                   </Text>
-                  <Text size="xs">Thank you ✨</Text>
+                  <Text size="xs">{t('receipt_thank_you')}</Text>
                 </Group>
               </Collapse>
             </Paper>

@@ -1,4 +1,4 @@
-import AdminLogin from "@/components/admin/login/AdminLogin";
+import AdminLogin from '@/components/admin/login/AdminLogin';
 
 export const metadata = { title: 'Admin login' };
 

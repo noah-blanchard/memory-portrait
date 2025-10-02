@@ -8,9 +8,9 @@ import {
   IconMail,
   IconPhone,
 } from '@tabler/icons-react';
+import { useTranslation } from 'react-i18next';
 import { CopyButton, Group } from '@mantine/core';
 import { Badge, Button } from '@/components/I18nUI/I18nUI';
-import { useTranslation } from 'react-i18next';
 
 const methodColors: Record<string, string> = {
   email: 'blue',
@@ -27,7 +27,7 @@ export default function ContactPill({
   value: string;
 }) {
   const { t } = useTranslation('common');
-  
+
   const icon =
     method === 'email' ? (
       <IconMail size={14} />
