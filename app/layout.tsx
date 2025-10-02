@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import Providers from './providers';
+import PageTransition from '@/components/transitions/PageTransition';
 
 export const metadata: Metadata = {
   title: 'Memory Portrait',
@@ -16,7 +17,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body style={{ margin: 0, padding: 0 }}>
-        <Providers>{children}</Providers>
+        <Providers>
+          <PageTransition>
+            {children}
+          </PageTransition>
+        </Providers>
       </body>
     </html>
   );

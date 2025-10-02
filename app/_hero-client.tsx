@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
+import { usePageTransition } from '@/hooks/usePageTransition';
 import { 
   IconBrandInstagram, 
   IconBrandWechat, 
@@ -27,6 +27,7 @@ export default function HeroClient() {
   const { t, i18n } = useTranslation('common');
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [currentLang, setCurrentLang] = useState<'en' | 'zh'>('en');
+  const { navigateWithTransition } = usePageTransition();
 
   useEffect(() => {
     const saved = (typeof window !== 'undefined' && (localStorage.getItem('lang') as 'en' | 'zh')) || null;
@@ -145,8 +146,7 @@ export default function HeroClient() {
 
           {/* CTA Button */}
           <Button
-            component={Link}
-            href="/booking"
+            onClick={(e) => navigateWithTransition('/booking', e)}
             size={isMobile ? 'lg' : 'xl'}
             radius="xl"
             color="ocean"
@@ -161,6 +161,7 @@ export default function HeroClient() {
                 fontWeight: 600,
                 boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
                 transition: 'all 0.2s ease',
+                cursor: 'pointer',
                 '&:hover': {
                   transform: 'translateY(-2px)',
                   boxShadow: '0 12px 32px rgba(0, 0, 0, 0.16)',
