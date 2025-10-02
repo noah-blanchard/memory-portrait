@@ -211,5 +211,23 @@
   "cancel": "Cancel",
   "confirm": "Confirm",
   
+  "weather_excellent": "Excellent",
+  "weather_good": "Good",
+  "weather_fair": "Fair",
+  "weather_poor": "Poor",
+  "weather_precipitation": "Precipitation chance",
+  "weather_wind": "Wind speed",
+  "weather_visibility": "Visibility",
+  "weather_golden_hour": "Golden hour times",
+  "weather_excellent": "Excellent",
+  "weather_good": "Good", 
+  "weather_fair": "Fair",
+  "weather_poor": "Poor",
+  "weather_rain": "rain",
+  "weather_excellent_message": "Perfect for outdoor photography!",
+  "weather_good_message": "Great diffused lighting!",
+  "weather_fair_message": "Manageable conditions with preparation",
+  "weather_poor_message": "Challenging weather conditions",
+  
   "transition_smile": "Smile!"
 }

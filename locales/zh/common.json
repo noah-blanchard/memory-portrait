@@ -211,5 +211,23 @@
   "cancel": "取消",
   "confirm": "确认",
   
+  "weather_excellent": "极佳",
+  "weather_good": "良好",
+  "weather_fair": "一般",
+  "weather_poor": "较差",
+  "weather_precipitation": "降水概率",
+  "weather_wind": "风速",
+  "weather_visibility": "能见度",
+  "weather_golden_hour": "黄金时段",
+  "weather_excellent": "极佳",
+  "weather_good": "良好", 
+  "weather_fair": "一般",
+  "weather_poor": "较差",
+  "weather_rain": "降雨",
+  "weather_excellent_message": "户外摄影的完美条件！",
+  "weather_good_message": "绝佳的柔和光线！",
+  "weather_fair_message": "需要准备但条件可控",
+  "weather_poor_message": "天气条件具有挑战性",
+  
   "transition_smile": "笑一个！"
 }

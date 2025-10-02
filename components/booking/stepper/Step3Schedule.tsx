@@ -8,6 +8,7 @@ import { DatePickerInput } from '@mantine/dates';
 import { useMediaQuery } from '@mantine/hooks';
 import ButtonNumberInput from '@/components/number/NumberInput';
 import TimeInput from '@/components/time/TimeInput';
+import WeatherWidget from '@/components/weather/WeatherWidget';
 import type { BookingStepProps } from '@/types/components';
 
 export interface Step3ScheduleValues {
@@ -78,6 +79,12 @@ export default function Step3Schedule({
                 {...form.getInputProps('date')}
               />
             </Paper>
+
+            {/* Weather Widget */}
+            <WeatherWidget 
+              date={form.values.date} 
+              location={form.values.location || 'Montreal'} 
+            />
 
             {/* Time Selection */}
             <Paper
