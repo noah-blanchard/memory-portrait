@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import {
   IconDashboard,
   IconCalendar,
-  IconSettings,
   IconLogout,
 } from '@tabler/icons-react';
 import {

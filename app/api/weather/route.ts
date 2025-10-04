@@ -158,8 +158,10 @@ export async function GET(req: Request): Promise<NextResponse<ApiResponse<Weathe
       return createServerErrorResponse('Weather service not configured');
     }
 
+    const apiLocation = validatedLocation.toLowerCase() === 'quebec city' ? 'Quebec' : validatedLocation;
+
     const BASE_URL = 'https://api.weatherapi.com/v1';
-    const url = `${BASE_URL}/forecast.json?key=${API_KEY}&q=${encodeURIComponent(validatedLocation)}&days=3&aqi=no&alerts=no`;
+    const url = `${BASE_URL}/forecast.json?key=${API_KEY}&q=${encodeURIComponent(apiLocation)}&days=3&aqi=no&alerts=no`;
     
     const response = await fetch(url);
 
