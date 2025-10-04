@@ -1,7 +1,12 @@
-import BookingsPanel from '@/components/admin/bookings/BookingsPanel';
+'use client';
 
-export const metadata = { title: 'Bookings — Admin' };
+import AdminLayout from '@/components/admin/layout/AdminLayout';
+import BookingSearchPanel from '@/components/admin/bookings/BookingSearchPanel';
 
 export default function AdminBookingsPage() {
-  return <BookingsPanel />;
+  return (
+    <AdminLayout>
+      <BookingSearchPanel />
+    </AdminLayout>
+  );
 }

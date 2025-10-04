@@ -53,8 +53,33 @@ export default function HeroClient() {
   return (
     <Box component="section" py={{ base: 32, sm: 48, md: 64 }}>
       <Container size="sm">
-        {/* Language Switcher - Top Right */}
-        <Flex justify="flex-end" mb={{ base: 24, sm: 32 }}>
+        {/* Top Controls - Language Switcher & Admin Login */}
+        <Flex justify="space-between" align="center" mb={{ base: 24, sm: 32 }}>
+          {/* Admin Login Button - Discreet */}
+          <Button
+            variant="subtle"
+            size="xs"
+            color="gray"
+            onClick={(e) => navigateWithTransition('/admin-login', e)}
+            style={{
+              opacity: 0.6,
+              fontSize: '11px',
+              fontWeight: 500,
+              padding: '4px 8px',
+              borderRadius: '6px',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = '1';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = '0.6';
+            }}
+          >
+            Admin
+          </Button>
+
+          {/* Language Switcher */}
           <Group gap={4} p={4} style={{ 
             backgroundColor: 'var(--mantine-color-gray-0)', 
             borderRadius: '12px',

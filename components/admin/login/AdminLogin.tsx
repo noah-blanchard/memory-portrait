@@ -43,7 +43,7 @@ export default function AdminLogin() {
   });
 
   return (
-    <Center>
+    <Center style={{ minHeight: '100vh' }}>
       <Container size={420} p={0}>
         <Paper withBorder shadow="sm" radius="lg" p="xl">
           <Stack gap="md">

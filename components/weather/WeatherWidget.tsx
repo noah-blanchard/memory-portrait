@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Box,
@@ -22,10 +21,11 @@ import {
   IconSunset,
 } from '@tabler/icons-react';
 import { useMediaQuery } from '@mantine/hooks';
-import { weatherService, type WeatherData, type WeatherRecommendation } from '@/utils/weather/weatherService';
+import { useWeather } from '@/lib/api/hooks';
+import { weatherService, type WeatherRecommendation } from '@/utils/weather/weatherService';
 
 interface WeatherWidgetProps {
-  date: Date | null;
+  date: Date | string | null;
   location?: string;
 }
 
@@ -65,66 +65,63 @@ const getRecommendationColor = (type: WeatherRecommendation['type']) => {
 export default function WeatherWidget({ date, location = 'Montreal' }: WeatherWidgetProps) {
   const { t } = useTranslation('common');
   const isMobile = useMediaQuery('(max-width: 768px)');
-  const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [recommendation, setRecommendation] = useState<WeatherRecommendation | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
 
-  useEffect(() => {
+  // Check if we should fetch weather (within next 3 days)
+  const shouldFetchWeather = (() => {
     if (!date || !weatherService.isAvailable()) {
-      setWeather(null);
-      setRecommendation(null);
-      return;
+      return false;
     }
-
-    const fetchWeather = async () => {
-      setLoading(true);
-      setError(false);
-      
-      try {
-        const weatherData = await weatherService.getWeatherForDate(location, date);
-        
-        if (weatherData) {
-          setWeather(weatherData);
-          const recommendation = weatherService.getPhotoshootRecommendation(weatherData);
-          setRecommendation(recommendation);
-        } else {
-          setWeather(null);
-          setRecommendation(null);
-        }
-      } catch (err) {
-        setError(true);
-        setWeather(null);
-        setRecommendation(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // Only fetch weather for dates within the next 3 days
+    
+    // Ensure we have a Date object
+    const dateObj = date instanceof Date ? date : new Date(date);
+    
+    // Check if the date is valid
+    if (isNaN(dateObj.getTime())) {
+      return false;
+    }
+    
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    const selectedDate = new Date(date);
+    const selectedDate = new Date(dateObj);
     selectedDate.setHours(0, 0, 0, 0);
     
     const threeDaysFromNow = new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000);
     
-    if (selectedDate >= today && selectedDate <= threeDaysFromNow) {
-      fetchWeather();
-    } else {
-      setWeather(null);
-      setRecommendation(null);
+    return selectedDate >= today && selectedDate <= threeDaysFromNow;
+  })();
+
+  // Format date for API call
+  const dateStr = (() => {
+    if (!date) {
+      return '';
     }
-  }, [date, location]);
+    
+    // Ensure we have a Date object
+    const dateObj = date instanceof Date ? date : new Date(date);
+    
+    // Check if the date is valid
+    if (isNaN(dateObj.getTime())) {
+      return '';
+    }
+    
+    return `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+  })();
+
+  // Use TanStack Query
+  const { data: weather, isLoading, error } = useWeather(
+    location,
+    dateStr,
+    shouldFetchWeather
+  );
 
   // Don't render anything if weather service is not available or no data
-  if (!weatherService.isAvailable() || error || (!loading && !weather)) {
+  if (!weatherService.isAvailable() || error || (!isLoading && !weather)) {
     return null;
   }
 
   // Loading state
-  if (loading) {
+  if (isLoading) {
     return (
       <Paper
         p={isMobile ? 'sm' : 'md'}
@@ -149,9 +146,11 @@ export default function WeatherWidget({ date, location = 'Montreal' }: WeatherWi
     );
   }
 
-  if (!weather || !recommendation) {
+  if (!weather) {
     return null;
   }
+
+  const recommendation = weatherService.getPhotoshootRecommendation(weather);
 
   return (
     <Paper

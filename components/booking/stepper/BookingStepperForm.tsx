@@ -44,19 +44,20 @@ import Step3Schedule from './Step3Schedule';
 import Step4Equipment from './Step4Equipment';
 import Step5Review from './Step5Review';
 import { mergeDateTime } from '@/utils/common';
+import { useCreateBooking } from '@/lib/api/hooks';
 
 export default function BookingStepperForm() {
   const { t, i18n } = useTranslation('common');
   const theme = useMantineTheme();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [active, setActive] = useState(0);
-  const [_serverError, setServerError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [receipt, setReceipt] = useState<ReceiptData | null>(null);
   const [stepTransition, setStepTransition] = useState<'slide-left' | 'slide-right' | 'fade'>(
     'fade'
   );
   const [currentLang, setCurrentLang] = useState<'en' | 'zh'>('en');
+  
+  const createBookingMutation = useCreateBooking();
 
   const form = useForm({
     initialValues: {
@@ -205,25 +206,12 @@ export default function BookingStepperForm() {
       return;
     }
 
-    setServerError(null);
-    setLoading(true);
     try {
-      const res = await fetch('/api/bookings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(final.data),
-      });
-      const json = await res.json();
-      if (!res.ok || !json?.ok) {
-        setServerError(json?.error?.message ?? 'Unknown error');
-        return;
-      }
-
-      const created = json.data as { request_uid?: string; created_at?: string } | undefined;
+      const created = await createBookingMutation.mutateAsync(final.data);
 
       setReceipt({
-        id: created?.request_uid ?? null,
-        createdAt: created?.created_at ?? null,
+        id: created.request_uid ?? null,
+        createdAt: created.created_at ?? null,
         name: final.data.clientName,
         method: final.data.contactMethod,
         contact: final.data.contact,
@@ -246,10 +234,9 @@ export default function BookingStepperForm() {
       } as ReceiptData);
       setActive(5);
       form.reset();
-    } catch (e: any) {
-      setServerError(e?.message ?? 'Network error');
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      // Error is handled by TanStack Query
+      // Error will be available in createBookingMutation.error
     }
   };
 
@@ -384,13 +371,13 @@ export default function BookingStepperForm() {
               {active === 0 && <Step1Contact form={form} onNext={next} />}
               {active === 1 && <Step2Details form={form} onBack={back} onNext={next} />}
               {active === 2 && (
-                <Step3Schedule loading={loading} form={form} onBack={back} onNext={next} />
+                <Step3Schedule loading={createBookingMutation.isPending} form={form} onBack={back} onNext={next} />
               )}
               {active === 3 && (
-                <Step4Equipment loading={loading} form={form} onBack={back} onNext={next} />
+                <Step4Equipment loading={createBookingMutation.isPending} form={form} onBack={back} onNext={next} />
               )}
               {active === 4 && (
-                <Step5Review loading={loading} form={form} onBack={back} onNext={handleSubmit} />
+                <Step5Review loading={createBookingMutation.isPending} form={form} onBack={back} onNext={handleSubmit} />
               )}
               {active === 5 && <ReceiptCard data={receipt} onNew={restart} />}
             </Box>
@@ -427,7 +414,7 @@ export default function BookingStepperForm() {
           <Button
             size="md"
             onClick={active === 4 ? handleSubmit : next}
-            loading={loading}
+            loading={createBookingMutation.isPending}
             rightSection={active < 4 ? <IconChevronRight size={16} /> : <IconCheck size={16} />}
             style={{
               transition: 'all 0.2s ease',

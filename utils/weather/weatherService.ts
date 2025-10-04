@@ -41,9 +41,6 @@ interface WeatherApiResponse {
 }
 
 class WeatherService {
-  private cache = new Map<string, { data: WeatherData | null; timestamp: number }>();
-  private readonly CACHE_DURATION = 30 * 60 * 1000;
-
   isAvailable(): boolean {
     return true;
   }
@@ -57,13 +54,6 @@ class WeatherService {
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
       dateStr = `${year}-${month}-${day}`;
-    }
-
-    const cacheKey = `${location.toLowerCase()}-${dateStr}`;
-    const cached = this.cache.get(cacheKey);
-    
-    if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
-      return cached.data;
     }
 
     try {
@@ -85,11 +75,6 @@ class WeatherService {
       if (!result.ok) {
         return null;
       }
-
-      this.cache.set(cacheKey, {
-        data: result.data,
-        timestamp: Date.now(),
-      });
 
       return result.data;
     } catch (error) {
