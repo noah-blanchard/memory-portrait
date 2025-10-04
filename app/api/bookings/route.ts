@@ -29,7 +29,7 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<unkno
 
   try {
     const supabase = await createServerClient();
-    const { data, error } = await supabase.rpc('create_booking_request', args);
+    const { data, error } = await supabase.rpc('create_booking_request', args as any);
 
     if (error) {
       const code = (error.code || '').toLowerCase();

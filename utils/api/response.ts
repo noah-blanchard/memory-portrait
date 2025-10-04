@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import type {
   ApiErrorResponse,
-  ApiResponse,
   ApiResponseOptions,
   ApiSuccessResponse,
   HttpStatusCode,

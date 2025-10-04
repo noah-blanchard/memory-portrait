@@ -29,7 +29,6 @@ export const bookingCreateSchema = z
       .string()
       .transform(normalizeWhitespace)
       .optional()
-      .default(undefined)
       .pipe(z.string().max(200)),
 
     peopleCount: z.coerce.number().int().gte(1, 'peopleCount must be >= 1').default(1),
@@ -38,15 +37,13 @@ export const bookingCreateSchema = z
       .string()
       .max(16, 'Language code too long')
       .transform(normalizeWhitespace)
-      .optional()
-      .default(undefined),
+      .optional(),
 
     notes: z
       .string()
       .max(2000, 'Notes too long')
       .transform((s) => s.trim())
-      .optional()
-      .default(undefined),
+      .optional(),
 
     equipCanonIxus980is: z.boolean().default(false),
     equipHpCcd: z.boolean().default(false),

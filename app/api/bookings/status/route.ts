@@ -53,7 +53,7 @@ export async function PATCH(req: Request): Promise<
     const { data, error } = await supabase.rpc('set_booking_status', {
       p_request_uid: requestUid,
       p_status: status,
-    });
+    } as any);
 
     if (error) {
       return createRpcErrorResponse(error.message);
@@ -65,9 +65,9 @@ export async function PATCH(req: Request): Promise<
 
     return createSuccessResponse(
       {
-        request_uid: data.request_uid,
-        status: data.status,
-        updated_at: data.updated_at,
+        request_uid: (data as any).request_uid,
+        status: (data as any).status,
+        updated_at: (data as any).updated_at,
       },
       200
     );
