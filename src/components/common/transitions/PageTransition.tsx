@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
+import { useMantineTheme } from '@mantine/core';
+import { getGradient, getColorValue } from '@/utils/theme';
 
 interface PageTransitionProps {
   children: React.ReactNode;
@@ -39,6 +41,7 @@ export const triggerPageTransition = (targetUrl: string, triggerElement?: HTMLEl
 export default function PageTransition({ children }: PageTransitionProps) {
   const router = useRouter();
   const { t } = useTranslation('common');
+  const theme = useMantineTheme();
   const [transitionState, setTransitionState] = useState<TransitionState>(globalTransitionState);
 
   useEffect(() => {
@@ -136,7 +139,7 @@ export default function PageTransition({ children }: PageTransitionProps) {
             }}
             style={{
               position: 'fixed',
-              background: 'linear-gradient(135deg, var(--mantine-color-ocean-5) 0%, var(--mantine-color-ocean-6) 100%)',
+              background: getGradient(theme, 'secondary'),
               zIndex: 9999,
               pointerEvents: 'none',
               transformOrigin: 'center center',
@@ -201,9 +204,9 @@ export default function PageTransition({ children }: PageTransitionProps) {
                   transform: 'translate(-50%, -50%)',
                   width: '24px',
                   height: '24px',
-                  backgroundColor: '#374151',
-                  borderRadius: '50%',
-                  border: '2px solid #6B7280',
+                backgroundColor: getColorValue(theme, 'slate.7'),
+                borderRadius: '50%',
+                border: `2px solid ${getColorValue(theme, 'slate.5')}`,
                 }}
               >
                 {/* Lens Center */}
@@ -215,7 +218,7 @@ export default function PageTransition({ children }: PageTransitionProps) {
                     transform: 'translate(-50%, -50%)',
                     width: '12px',
                     height: '12px',
-                    backgroundColor: '#111827',
+                    backgroundColor: getColorValue(theme, 'slate.9'),
                     borderRadius: '50%',
                   }}
                 >
@@ -265,7 +268,7 @@ export default function PageTransition({ children }: PageTransitionProps) {
                   left: '8px',
                   width: '8px',
                   height: '6px',
-                  backgroundColor: '#1F2937',
+                  backgroundColor: getColorValue(theme, 'slate.8'),
                   borderRadius: '2px',
                 }}
               />

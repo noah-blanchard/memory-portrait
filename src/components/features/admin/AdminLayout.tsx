@@ -16,6 +16,7 @@ import {
   Divider,
   Box,
   ScrollArea,
+  useMantineTheme,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Button, Title } from '@/components/common/i18n';
@@ -27,6 +28,7 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const router = useRouter();
+  const theme = useMantineTheme();
   const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] = useDisclosure(false);
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
 
@@ -52,9 +54,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '12px',
-        padding: '12px 16px',
-        borderRadius: '12px',
+        gap: theme.spacing.sm,
+        padding: `${theme.spacing.sm} ${theme.spacing.md}`,
+        borderRadius: theme.radius.lg,
         transition: 'all 0.2s ease',
         backgroundColor: 'transparent',
         width: '100%',
@@ -87,9 +89,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       {/* Header */}
       <AppShell.Header
         style={{
-          background: 'rgba(255, 255, 255, 0.8)',
+          background: `${theme.white}CC`,
           backdropFilter: 'blur(10px)',
-          borderBottom: '1px solid var(--mantine-color-gray-2)',
+          borderBottom: `1px solid ${theme.colors.slate[2]}`,
         }}
       >
         <Group h="100%" px="md" justify="space-between">
@@ -117,9 +119,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       {/* Sidebar */}
       <AppShell.Navbar
         style={{
-          background: 'rgba(255, 255, 255, 0.9)',
+          background: `${theme.white}E6`,
           backdropFilter: 'blur(10px)',
-          borderRight: '1px solid var(--mantine-color-gray-2)',
+          borderRight: `1px solid ${theme.colors.slate[2]}`,
         }}
       >
         <AppShell.Section grow component={ScrollArea}>

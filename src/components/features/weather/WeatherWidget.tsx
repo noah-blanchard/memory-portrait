@@ -21,8 +21,10 @@ import {
   IconSunset,
 } from '@tabler/icons-react';
 import { useMediaQuery } from '@mantine/hooks';
+import { useMantineTheme } from '@mantine/core';
 import { useWeather } from '@/lib/api/hooks';
 import { weatherService, type WeatherRecommendation } from '@/utils/weather/weatherService';
+import { getGradient, getColorValue } from '@/utils/theme';
 
 interface WeatherWidgetProps {
   date: Date | string | null;
@@ -50,21 +52,39 @@ const getWeatherIcon = (condition: string, size = 20) => {
 const getRecommendationColor = (type: WeatherRecommendation['type']) => {
   switch (type) {
     case 'excellent':
-      return 'green';
+      return 'emerald';
     case 'good':
-      return 'blue';
+      return 'ocean';
     case 'fair':
-      return 'yellow';
+      return 'gold';
     case 'poor':
-      return 'red';
+      return 'rose';
     default:
-      return 'gray';
+      return 'slate';
   }
 };
 
+/**
+ * Weather Widget Component
+ * 
+ * Displays weather information and recommendations for photo shoots.
+ * Only fetches weather data for dates within the next 3 days.
+ * 
+ * Features:
+ * - Weather data integration with OpenWeatherMap API
+ * - Photo shoot recommendations based on weather conditions
+ * - Responsive design for mobile and desktop
+ * - Conditional rendering (only shows when weather service is available)
+ * 
+ * @param {WeatherWidgetProps} props - Component props
+ * @param {Date | string | null} props.date - The date to check weather for
+ * @param {string} props.location - The location to check weather for (default: 'Montreal')
+ * @returns {JSX.Element | null} The weather widget component or null if not available
+ */
 export default function WeatherWidget({ date, location = 'Montreal' }: WeatherWidgetProps) {
   const { t } = useTranslation('common');
   const isMobile = useMediaQuery('(max-width: 768px)');
+  const theme = useMantineTheme();
 
   // Check if we should fetch weather (within next 3 days)
   const shouldFetchWeather = (() => {
@@ -127,8 +147,8 @@ export default function WeatherWidget({ date, location = 'Montreal' }: WeatherWi
         p={isMobile ? 'sm' : 'md'}
         radius="md"
         style={{
-          background: 'linear-gradient(135deg, var(--mantine-color-blue-0) 0%, var(--mantine-color-cyan-0) 100%)',
-          border: '1px solid var(--mantine-color-blue-2)',
+          background: getGradient(theme, 'card'),
+          border: `1px solid ${getColorValue(theme, 'ocean.2')}`,
         }}
       >
         <Stack gap="xs">
@@ -157,8 +177,8 @@ export default function WeatherWidget({ date, location = 'Montreal' }: WeatherWi
       p={isMobile ? 'sm' : 'md'}
       radius="md"
       style={{
-        background: 'linear-gradient(135deg, var(--mantine-color-blue-0) 0%, var(--mantine-color-cyan-0) 100%)',
-        border: '1px solid var(--mantine-color-blue-2)',
+        background: getGradient(theme, 'card'),
+        border: `1px solid ${getColorValue(theme, 'ocean.2')}`,
         transition: 'all 0.2s ease',
       }}
     >
@@ -168,10 +188,10 @@ export default function WeatherWidget({ date, location = 'Montreal' }: WeatherWi
           <Group gap="sm" align="center">
             {getWeatherIcon(weather.condition.main, isMobile ? 24 : 28)}
             <Box>
-              <Text size={isMobile ? 'md' : 'lg'} fw={600} c="blue.8">
+              <Text size={isMobile ? 'md' : 'lg'} fw={600} c="ocean.8">
                 {weather.temperature.max}°C / {weather.temperature.min}°C
               </Text>
-              <Text size="sm" c="blue.6" tt="capitalize">
+              <Text size="sm" c="ocean.6" tt="capitalize">
                 {weather.condition.description}
               </Text>
             </Box>
@@ -193,20 +213,20 @@ export default function WeatherWidget({ date, location = 'Montreal' }: WeatherWi
         {/* Weather Details */}
         <Group justify="space-between" align="center">
           <Group gap="sm">
-            <IconDroplet size={14} style={{ color: 'var(--mantine-color-blue-5)' }} />
-            <Text size="sm" c="blue.6">
+            <IconDroplet size={14} style={{ color: getColorValue(theme, 'ocean.5') }} />
+            <Text size="sm" c="ocean.6">
               {weather.precipitation?.probability || 0}% {t('weather_rain', 'rain')}
             </Text>
           </Group>
 
           {weather.sunrise && weather.sunset && (
             <Group gap="sm">
-              <IconSunrise size={14} style={{ color: 'var(--mantine-color-orange-5)' }} />
-              <Text size="sm" c="blue.6">
+              <IconSunrise size={14} style={{ color: getColorValue(theme, 'orange.5') }} />
+              <Text size="sm" c="ocean.6">
                 {weather.sunrise}
               </Text>
-              <IconSunset size={14} style={{ color: 'var(--mantine-color-orange-5)' }} />
-              <Text size="sm" c="blue.6">
+              <IconSunset size={14} style={{ color: getColorValue(theme, 'orange.5') }} />
+              <Text size="sm" c="ocean.6">
                 {weather.sunset}
               </Text>
             </Group>
@@ -214,7 +234,7 @@ export default function WeatherWidget({ date, location = 'Montreal' }: WeatherWi
         </Group>
 
         {/* Photography Comment */}
-        <Text size="sm" c="blue.6" fs="italic">
+        <Text size="sm" c="ocean.6" fs="italic">
           {t(`weather_${recommendation.type}_message`, recommendation.message)}
         </Text>
       </Stack>

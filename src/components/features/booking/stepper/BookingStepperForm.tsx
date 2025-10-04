@@ -1,7 +1,7 @@
 'use client';
 
 import dayjs from 'dayjs';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import {
   IconCalendar,
   IconCheck,
@@ -30,6 +30,7 @@ import {
 import { useForm } from '@mantine/form';
 import { useMediaQuery } from '@mantine/hooks';
 import { ReceiptCard, ReceiptData } from '@/components/ui/feedback';
+import { getGradient, getColorValue, getShadow } from '@/utils/theme';
 import { mantineZodResolver } from '@/lib/mantineZodResolver';
 import {
   bookingCreateSchema,
@@ -46,6 +47,25 @@ import Step5Review from './Step5Review';
 import { mergeDateTime } from '@/utils/common';
 import { useCreateBooking } from '@/lib/api/hooks';
 
+/**
+ * Booking Stepper Form Component
+ * 
+ * Multi-step form for creating photo shoot bookings with:
+ * - Step 1: Contact information (name, contact method, contact details)
+ * - Step 2: Shoot details (type, location, people count)
+ * - Step 3: Schedule (date, time, duration)
+ * - Step 4: Equipment selection
+ * - Step 5: Review and confirmation
+ * 
+ * Features:
+ * - Form validation with Zod schemas
+ * - Language switching (EN/ZH)
+ * - Responsive design
+ * - Progress tracking
+ * - Receipt generation
+ * 
+ * @returns {JSX.Element} The booking stepper form component
+ */
 export default function BookingStepperForm() {
   const { t, i18n } = useTranslation('common');
   const theme = useMantineTheme();
@@ -91,7 +111,7 @@ export default function BookingStepperForm() {
     }
   }, [i18n]);
 
-  const switchLanguage = (lang: 'en' | 'zh') => {
+  const switchLanguage = useCallback((lang: 'en' | 'zh') => {
     setCurrentLang(lang);
     i18n.changeLanguage(lang);
     if (typeof document !== 'undefined') {
@@ -100,7 +120,7 @@ export default function BookingStepperForm() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('lang', lang);
     }
-  };
+  }, [i18n]);
 
   const schemaByIndex: Record<number, z.ZodTypeAny> = {
     0: contactStepSchema, // Step 1: Contact (name + contact)
@@ -263,10 +283,10 @@ export default function BookingStepperForm() {
         width: '100%',
         height: '100vh',
         padding: isMobile ? '1rem' : '2rem',
-        background: '#fff',
-        borderRadius: isMobile ? '1rem' : '0',
+        background: theme.white,
+        borderRadius: isMobile ? theme.radius.lg : '0',
         border: isMobile ? `1px solid ${theme.colors.slate[2]}` : 'none',
-        boxShadow: isMobile ? '0 8px 24px rgba(0,0,0,0.06)' : 'none',
+        boxShadow: isMobile ? theme.shadows.lg : 'none',
         display: 'flex',
         flexDirection: 'column',
       }}
@@ -289,7 +309,7 @@ export default function BookingStepperForm() {
             color="ocean"
             style={{
               transition: 'all 0.3s ease',
-              boxShadow: `0 2px 8px ${theme.colors.ocean[2]}`,
+              boxShadow: getShadow(theme, 'ocean.2', 0.2),
             }}
           />
         </Box>
@@ -311,7 +331,7 @@ export default function BookingStepperForm() {
               },
               '& .mantineStepperStep[dataProgress]': {
                 transform: 'scale(1.1)',
-                boxShadow: `0 4px 12px ${theme.colors.ocean[3]}`,
+                boxShadow: getShadow(theme, 'ocean.3', 0.3),
               },
               '& .mantineStepperStep[dataCompleted]': {
                 transform: 'scale(1.05)',
@@ -319,7 +339,7 @@ export default function BookingStepperForm() {
             },
             stepIcon: {
               border: `2px solid ${theme.colors.slate[3]}`,
-              backgroundColor: '#ffffff',
+              backgroundColor: theme.white,
               color: theme.colors.slate[6],
               '&[dataProgress]': {
                 borderColor: theme.colors.ocean[6],
@@ -393,7 +413,7 @@ export default function BookingStepperForm() {
           p="md"
           style={{ 
             borderTop: `1px solid ${theme.colors.slate[2]}`,
-            backgroundColor: '#fff',
+            backgroundColor: theme.white,
           }}
         >
           <Button
@@ -418,8 +438,8 @@ export default function BookingStepperForm() {
             rightSection={active < 4 ? <IconChevronRight size={16} /> : <IconCheck size={16} />}
             style={{
               transition: 'all 0.2s ease',
-              background: `linear-gradient(135deg, ${theme.colors.ocean[6]} 0%, ${theme.colors.emerald[6]} 100%)`,
-              boxShadow: `0 4px 12px ${theme.colors.ocean[3]}`,
+              background: getGradient(theme, 'secondary'),
+              boxShadow: getShadow(theme, 'ocean.3', 0.3),
             }}
           >
             {active === 4 ? t('step4_review_confirm') : t('common_next')}
@@ -443,15 +463,15 @@ export default function BookingStepperForm() {
               <UnstyledButton
                 onClick={() => switchLanguage('en')}
                 style={{
-                  padding: '4px 12px',
-                  borderRadius: '8px',
+                  padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
+                  borderRadius: theme.radius.sm,
                   fontSize: '12px',
                   fontWeight: 600,
                   backgroundColor:
                     currentLang === 'en'
-                      ? 'var(--mantine-color-ocean-5)'
-                      : 'var(--mantine-color-gray-1)',
-                  color: currentLang === 'en' ? '#fff' : 'var(--mantine-color-gray-7)',
+                      ? theme.colors.ocean[5]
+                      : theme.colors.slate[1],
+                  color: currentLang === 'en' ? theme.white : theme.colors.slate[6],
                   transition: 'all 0.2s ease',
                   cursor: 'pointer',
                 }}
@@ -461,15 +481,15 @@ export default function BookingStepperForm() {
               <UnstyledButton
                 onClick={() => switchLanguage('zh')}
                 style={{
-                  padding: '4px 12px',
-                  borderRadius: '8px',
+                  padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
+                  borderRadius: theme.radius.sm,
                   fontSize: '12px',
                   fontWeight: 600,
                   backgroundColor:
                     currentLang === 'zh'
-                      ? 'var(--mantine-color-ocean-5)'
-                      : 'var(--mantine-color-gray-1)',
-                  color: currentLang === 'zh' ? '#fff' : 'var(--mantine-color-gray-7)',
+                      ? theme.colors.ocean[5]
+                      : theme.colors.slate[1],
+                  color: currentLang === 'zh' ? theme.white : theme.colors.slate[6],
                   transition: 'all 0.2s ease',
                   cursor: 'pointer',
                 }}

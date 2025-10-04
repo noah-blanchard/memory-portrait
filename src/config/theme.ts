@@ -6,6 +6,22 @@ import {
   type MantineThemeOverride,
 } from '@mantine/core';
 
+// Extend Mantine theme to include gradients
+declare module '@mantine/core' {
+  interface MantineTheme {
+    gradients: {
+      primary: { from: string; to: string; deg: number };
+      secondary: { from: string; to: string; deg: number };
+      success: { from: string; to: string; deg: number };
+      warning: { from: string; to: string; deg: number };
+      danger: { from: string; to: string; deg: number };
+      neutral: { from: string; to: string; deg: number };
+      background: { from: string; to: string; deg: number };
+      card: { from: string; to: string; deg: number };
+    };
+  }
+}
+
 export const theme: MantineThemeOverride = createTheme({
   colors: {
     ocean: [
@@ -644,5 +660,49 @@ export const theme: MantineThemeOverride = createTheme({
     from: 'rose.6',
     to: 'gold.6',
     deg: 135,
+  },
+
+  // Additional gradient definitions for consistency
+  gradients: {
+    primary: {
+      from: 'rose.6',
+      to: 'gold.6',
+      deg: 135,
+    },
+    secondary: {
+      from: 'ocean.6',
+      to: 'emerald.6',
+      deg: 135,
+    },
+    success: {
+      from: 'emerald.6',
+      to: 'emerald.7',
+      deg: 135,
+    },
+    warning: {
+      from: 'gold.6',
+      to: 'orange.6',
+      deg: 135,
+    },
+    danger: {
+      from: 'rose.6',
+      to: 'crimson.6',
+      deg: 135,
+    },
+    neutral: {
+      from: 'slate.4',
+      to: 'slate.6',
+      deg: 135,
+    },
+    background: {
+      from: 'rose.0',
+      to: 'gold.0',
+      deg: 135,
+    },
+    card: {
+      from: 'ocean.0',
+      to: 'emerald.0',
+      deg: 135,
+    },
   },
 });

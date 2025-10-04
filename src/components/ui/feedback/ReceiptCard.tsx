@@ -6,7 +6,7 @@ import { Roboto_Mono } from 'next/font/google';
 import { IconCheck, IconCopy, IconDownload } from '@tabler/icons-react';
 import html2canvas from 'html2canvas';
 import { useTranslation } from 'react-i18next';
-import { Box, Collapse, CopyButton, Group, Paper, Stack, Transition } from '@mantine/core';
+import { Box, Collapse, CopyButton, Group, Paper, Stack, Transition, useMantineTheme } from '@mantine/core';
 import { Button, Text, Tooltip } from '@/components/common/i18n';
 import { estimatePrice, RATES } from '@/components/features/booking/stepper/helpers';
 
@@ -47,6 +47,7 @@ export default function ReceiptCard({
   onNew,
 }: ReceiptCardProps) {
   const { t } = useTranslation('common');
+  const theme = useMantineTheme();
   const mounted = !!data;
   const [opened, setOpened] = useState(false);
 
@@ -69,7 +70,7 @@ export default function ReceiptCard({
     );
   }
 
-  const line = <Box my={7} style={{ borderTop: '1px dashed var(--mantine-color-gray-4)' }} />;
+  const line = <Box my={7} style={{ borderTop: `1px dashed ${theme.colors.slate[4]}` }} />;
 
   async function downloadReceipt(id: string | null | undefined) {
     if (!id) {
@@ -80,7 +81,7 @@ export default function ReceiptCard({
       return;
     }
     const canvas = await html2canvas(receiptEl as HTMLElement, {
-      backgroundColor: '#fff',
+      backgroundColor: theme.white,
       scale: 2,
     });
     const imgData = canvas.toDataURL('image/png');

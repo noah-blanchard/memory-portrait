@@ -27,7 +27,6 @@
     "@supabase/supabase-js": "^2.55.0",
     "@tabler/icons-react": "^3.34.0",
     "@tanstack/react-query": "^5.90.2",
-    "@tanstack/react-query-devtools": "^5.90.2",
     "dayjs": "^1.11.13",
     "framer-motion": "^12.23.22",
     "html2canvas": "^1.4.1",
